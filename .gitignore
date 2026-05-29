@@ -1,0 +1,17 @@
+# Build output
+build/
+out/
+
+# Gradle
+.gradle/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Environment
+.env
+*.env.local
