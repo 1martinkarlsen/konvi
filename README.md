@@ -7,8 +7,8 @@ A Kotlin web framework for safe and productive backend development.
 ```kotlin
 @Route
 class UserController @Inject constructor() {
-    suspend fun RoutingCall.getAll() {
-        respond(listOf("Alice", "Bob"))
+    suspend fun getAll(call: RoutingCall) {
+        call.respond(listOf("Alice", "Bob"))
     }
 }
 
