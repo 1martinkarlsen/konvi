@@ -1,7 +1,11 @@
 package com.konvi.ksp
 
-import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.Dependencies
+import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 
 private const val ROUTE = "com.konvi.route.Route"
 private const val MIDDLEWARE = "com.konvi.route.Middleware"
@@ -33,7 +37,7 @@ class KonviProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor
         val sourceFiles = allClasses.mapNotNull { it.containingFile }.toTypedArray()
 
         codeGenerator.createNewFile(
-            dependencies = Dependencies(aggregating = true, *sourceFiles),
+            dependencies = Dependencies(aggregating = true, sources = *sourceFiles),
             packageName = GENERATED_PACKAGE,
             fileName = GENERATED_FILE
         ).bufferedWriter().use { writer ->
