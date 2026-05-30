@@ -36,6 +36,7 @@ class KonviProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor
         val allClasses = routes + middlewares
         val sourceFiles = allClasses.mapNotNull { it.containingFile }.toTypedArray()
 
+        @Suppress("SpreadOperator")
         codeGenerator.createNewFile(
             dependencies = Dependencies(aggregating = true, sources = *sourceFiles),
             packageName = GENERATED_PACKAGE,

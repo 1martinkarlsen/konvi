@@ -14,6 +14,7 @@ import io.ktor.server.http.content.staticResources
 
 class KonviRouter internal constructor(internal val block: Routing.() -> Unit)
 
+@Suppress("TooManyFunctions")
 class KonviRoutingBuilder(
     private val routing: Route,
     private val groupMiddlewares: List<suspend (RoutingCall) -> Unit> = emptyList()

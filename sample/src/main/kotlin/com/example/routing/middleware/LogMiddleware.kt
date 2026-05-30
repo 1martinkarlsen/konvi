@@ -9,6 +9,6 @@ class LogMiddleware @Inject constructor() {
 
 
     suspend fun test(call: RoutingCall) {
-        println("HEJ MED DIG")
+        println("${call.request.httpMethod.value} ${call.request.uri}")
     }
 }
