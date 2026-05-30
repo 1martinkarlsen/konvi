@@ -7,6 +7,7 @@ internal fun loadConfig(): Config {
 
     fun str(path: String, default: String) = yaml?.propertyOrNull(path)?.getString() ?: default
     fun int(path: String, default: Int) = yaml?.propertyOrNull(path)?.getString()?.toIntOrNull() ?: default
+    fun list(path: String) = yaml?.propertyOrNull(path)?.getList() ?: emptyList()
 
     return Config(
         port = int(path = "konvi.port", default = 8080),
@@ -15,6 +16,9 @@ internal fun loadConfig(): Config {
             driver = str("konvi.database.driver", "org.h2.Driver"),
             username = str("konvi.database.username", "sa"),
             password = str("konvi.database.password", "")
+        ),
+        cors = CorsConfig(
+            allowedOrigins = list("konvi.cors.allowedOrigins")
         )
     )
 }
