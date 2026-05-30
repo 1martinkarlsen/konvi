@@ -5,9 +5,9 @@ import me.tatarka.inject.annotations.Inject
 
 class UserRepository @Inject constructor() {
     private val users = listOf(
-        User(1, "Alice"),
-        User(2, "Bob"),
-        User(3, "Charlie")
+        User(id = 1, name = "Alice"),
+        User(id = 2, name = "Bob"),
+        User(id = 3, name = "Charlie")
     )
 
     fun findAll(): List<User> = users

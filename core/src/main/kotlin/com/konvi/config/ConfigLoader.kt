@@ -9,7 +9,7 @@ internal fun loadConfig(): Config {
     fun int(path: String, default: Int) = yaml?.propertyOrNull(path)?.getString()?.toIntOrNull() ?: default
 
     return Config(
-        port = int("konvi.port", 8080),
+        port = int(path = "konvi.port", default = 8080),
         database = DatabaseConfig(
             url = str("konvi.database.url", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"),
             driver = str("konvi.database.driver", "org.h2.Driver"),

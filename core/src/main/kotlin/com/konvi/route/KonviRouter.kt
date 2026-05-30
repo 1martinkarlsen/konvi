@@ -14,6 +14,7 @@ import io.ktor.server.http.content.staticResources
 
 class KonviRouter internal constructor(internal val block: Routing.() -> Unit)
 
+@Suppress("TooManyFunctions")
 class KonviRoutingBuilder(
     private val routing: Route,
     private val groupMiddlewares: List<suspend (RoutingCall) -> Unit> = emptyList()
@@ -44,14 +45,20 @@ class KonviRoutingBuilder(
     fun post(path: String, handler: suspend RoutingCall.() -> Unit) =
         routing.post(path) { handle(call, handler, emptyList()) }
 
-    fun post(path: String, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.post(path) { handle(call, handler, middlewares.toList()) }
+    fun post(
+        path: String,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.post(path) { handle(call, handler, middlewares.toList()) }
 
     fun post(path: Regex, handler: suspend RoutingCall.() -> Unit) =
         routing.post(path) { handle(call, handler, emptyList()) }
 
-    fun post(path: Regex, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.post(path) { handle(call, handler, middlewares.toList()) }
+    fun post(
+        path: Regex,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.post(path) { handle(call, handler, middlewares.toList()) }
 
     fun put(path: String, handler: suspend RoutingCall.() -> Unit) =
         routing.put(path) { handle(call, handler, emptyList()) }
@@ -62,32 +69,47 @@ class KonviRoutingBuilder(
     fun put(path: Regex, handler: suspend RoutingCall.() -> Unit) =
         routing.put(path) { handle(call, handler, emptyList()) }
 
-    fun put(path: Regex, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.put(path) { handle(call, handler, middlewares.toList()) }
+    fun put(
+        path: Regex,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.put(path) { handle(call, handler, middlewares.toList()) }
 
     fun delete(path: String, handler: suspend RoutingCall.() -> Unit) =
         routing.delete(path) { handle(call, handler, emptyList()) }
 
-    fun delete(path: String, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.delete(path) { handle(call, handler, middlewares.toList()) }
+    fun delete(
+        path: String,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.delete(path) { handle(call, handler, middlewares.toList()) }
 
     fun delete(path: Regex, handler: suspend RoutingCall.() -> Unit) =
         routing.delete(path) { handle(call, handler, emptyList()) }
 
-    fun delete(path: Regex, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.delete(path) { handle(call, handler, middlewares.toList()) }
+    fun delete(
+        path: Regex,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.delete(path) { handle(call, handler, middlewares.toList()) }
 
     fun patch(path: String, handler: suspend RoutingCall.() -> Unit) =
         routing.patch(path) { handle(call, handler, emptyList()) }
 
-    fun patch(path: String, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.patch(path) { handle(call, handler, middlewares.toList()) }
+    fun patch(
+        path: String,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.patch(path) { handle(call, handler, middlewares.toList()) }
 
     fun patch(path: Regex, handler: suspend RoutingCall.() -> Unit) =
         routing.patch(path) { handle(call, handler, emptyList()) }
 
-    fun patch(path: Regex, handler: suspend RoutingCall.() -> Unit, vararg middlewares: suspend (RoutingCall) -> Unit) =
-        routing.patch(path) { handle(call, handler, middlewares.toList()) }
+    fun patch(
+        path: Regex,
+        handler: suspend RoutingCall.() -> Unit,
+        vararg middlewares: suspend (RoutingCall) -> Unit
+    ) = routing.patch(path) { handle(call, handler, middlewares.toList()) }
 
     fun group(path: String, vararg mw: suspend (RoutingCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
         routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + mw.toList())) }
