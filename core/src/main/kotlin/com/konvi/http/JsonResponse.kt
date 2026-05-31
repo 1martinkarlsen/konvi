@@ -13,6 +13,14 @@ suspend fun RoutingCall.created(body: Any, location: String? = null) {
 
 suspend fun RoutingCall.noContent() = respond(HttpStatusCode.NoContent)
 
-suspend fun RoutingCall.notFound() = respond(HttpStatusCode.NotFound)
+suspend fun RoutingCall.notFound() =
+    respond(HttpStatusCode.NotFound, ErrorResponse(HttpStatusCode.NotFound.value, HttpStatusCode.NotFound.description))
 
-suspend fun RoutingCall.badRequest(body: Any) = respond(HttpStatusCode.BadRequest, body)
+suspend fun RoutingCall.badRequest(message: String = HttpStatusCode.BadRequest.description) =
+    respond(HttpStatusCode.BadRequest, ErrorResponse(HttpStatusCode.BadRequest.value, message))
+
+suspend fun RoutingCall.unauthorized(message: String = HttpStatusCode.Unauthorized.description) =
+    respond(HttpStatusCode.Unauthorized, ErrorResponse(HttpStatusCode.Unauthorized.value, message))
+
+suspend fun RoutingCall.forbidden(message: String = HttpStatusCode.Forbidden.description) =
+    respond(HttpStatusCode.Forbidden, ErrorResponse(HttpStatusCode.Forbidden.value, message))
