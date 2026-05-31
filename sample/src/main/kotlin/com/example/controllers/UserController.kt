@@ -1,11 +1,8 @@
 package com.example.controllers
 
 import com.example.services.UserService
-import com.konvi.route.Route
-import com.konvi.route.created
-import com.konvi.template.view
+import com.konvi.routing.Route
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingCall
 import me.tatarka.inject.annotations.Inject

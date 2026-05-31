@@ -1,6 +1,6 @@
 package com.example.routing.middleware
 
-import com.konvi.route.Middleware
+import com.konvi.routing.Middleware
 import io.ktor.server.routing.RoutingCall
 import me.tatarka.inject.annotations.Inject
 

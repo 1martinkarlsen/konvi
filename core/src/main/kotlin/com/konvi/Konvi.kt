@@ -6,7 +6,7 @@ import com.konvi.di.KonviComponent
 import com.konvi.exception.configureExceptions
 import com.konvi.http.configureHttp
 import com.konvi.logging.configureLogging
-import com.konvi.route.KonviRouter
+import com.konvi.routing.KonviRouter
 import com.konvi.template.configureTemplate
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
