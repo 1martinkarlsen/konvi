@@ -1,5 +1,5 @@
-package com.konvi.route
+package com.konvi.routing
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
-annotation class Middleware
+annotation class Route

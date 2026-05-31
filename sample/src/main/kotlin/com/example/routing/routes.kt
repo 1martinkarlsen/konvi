@@ -1,7 +1,7 @@
 package com.example.routing
 
 import com.konvi.generated.Routes
-import com.konvi.route.router
+import com.konvi.routing.router
 import com.konvi.template.view
 
 fun Routes.api() = router {

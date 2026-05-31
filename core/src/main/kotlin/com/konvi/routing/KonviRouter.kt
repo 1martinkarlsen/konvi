@@ -1,4 +1,4 @@
-package com.konvi.route
+package com.konvi.routing
 
 import io.ktor.server.application.isHandled
 import io.ktor.server.routing.Route

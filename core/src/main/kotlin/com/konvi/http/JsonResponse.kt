@@ -1,4 +1,4 @@
-package com.konvi.route
+package com.konvi.http
 
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
