@@ -1,5 +1,6 @@
 package com.konvi.exception
 
+import com.konvi.http.ErrorResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -20,13 +21,19 @@ internal fun Application.configureExceptions() {
         exception<Throwable> { call, _ ->
             call.respond(
                 status = HttpStatusCode.InternalServerError,
-                message = ErrorResponse(status = 500, message = "Internal Server Error")
+                message = ErrorResponse(
+                    status = HttpStatusCode.InternalServerError.value,
+                    message = HttpStatusCode.InternalServerError.description
+                )
             )
         }
         status(HttpStatusCode.NotFound) { call, status ->
             call.respond(
                 status = status,
-                message = ErrorResponse(status = status.value, message = "Not Found")
+                message = ErrorResponse(
+                    status = status.value,
+                    message = status.description
+                )
             )
         }
     }
