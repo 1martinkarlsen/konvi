@@ -1,15 +1,22 @@
 package com.konvi.http
 
+import com.konvi.config.AuthConfig
 import com.konvi.config.CorsConfig
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.basic
+import io.ktor.server.auth.bearer
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.ratelimit.RateLimit
 import kotlin.time.Duration.Companion.seconds
 
-internal fun Application.configureHttp(corsConfig: CorsConfig) {
+internal fun Application.configureHttp(
+    corsConfig: CorsConfig,
+    authConfig: AuthConfig
+) {
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
@@ -26,6 +33,12 @@ internal fun Application.configureHttp(corsConfig: CorsConfig) {
                 limit = 100,
                 refillPeriod = 60.seconds
             )
+        }
+    }
+
+    install(Authentication) {
+        basic("auth-basic") {
+            realm = authConfig.basic.realm
         }
     }
 }

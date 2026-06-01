@@ -111,11 +111,11 @@ class KonviRoutingBuilder(
         vararg middlewares: suspend (RoutingCall) -> Unit
     ) = routing.patch(path) { handle(call, handler, middlewares.toList()) }
 
-    fun group(path: String, vararg mw: suspend (RoutingCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
-        routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + mw.toList())) }
+    fun group(path: String, vararg middleware: suspend (RoutingCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
+        routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
 
-    fun group(path: Regex, vararg mw: suspend (RoutingCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
-        routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + mw.toList())) }
+    fun group(path: Regex, vararg middleware: suspend (RoutingCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
+        routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
 
     fun staticResources(remotePath: String, localPath: String) =
         routing.staticResources(remotePath, localPath)

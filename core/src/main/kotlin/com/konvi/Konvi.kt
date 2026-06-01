@@ -26,7 +26,10 @@ object Konvi {
             configureLogging()
             configureExceptions()
             configureTemplate()
-            configureHttp(config.cors)
+            configureHttp(
+                corsConfig = config.cors,
+                authConfig = config.auth
+            )
 
             routing {
                 component.routes().block(this)
