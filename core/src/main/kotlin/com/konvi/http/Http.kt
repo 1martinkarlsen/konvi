@@ -6,6 +6,8 @@ import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.ratelimit.RateLimit
+import kotlin.time.Duration.Companion.seconds
 
 internal fun Application.configureHttp(corsConfig: CorsConfig) {
     install(CORS) {
@@ -16,5 +18,14 @@ internal fun Application.configureHttp(corsConfig: CorsConfig) {
         allowHeader(HttpHeaders.Authorization)
 
         allowOrigins { it in corsConfig.allowedOrigins }
+    }
+
+    install(RateLimit) {
+        global {
+            rateLimiter(
+                limit = 100,
+                refillPeriod = 60.seconds
+            )
+        }
     }
 }
