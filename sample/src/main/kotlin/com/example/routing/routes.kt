@@ -8,7 +8,7 @@ fun Routes.api() = router {
     get("/") {
         view("index")
     }
-    get("/users", userController::getAll, logMiddleware::test)
+    get("/users", userController::getAll, logMiddleware::test, authMiddleware::basic)
     get("/users/{id}", userController::find)
 
     group("/admin", logMiddleware::test) {

@@ -7,8 +7,8 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 
-private const val ROUTE = "com.konvi.route.Route"
-private const val MIDDLEWARE = "com.konvi.route.Middleware"
+private const val ROUTE = "com.konvi.routing.Route"
+private const val MIDDLEWARE = "com.konvi.routing.Middleware"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "Routes"
 
@@ -47,7 +47,7 @@ class KonviProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import com.konvi.di.KonviComponent")
             writer.appendLine("import com.konvi.Konvi")
-            writer.appendLine("import com.konvi.route.KonviRouter")
+            writer.appendLine("import com.konvi.routing.KonviRouter")
             allClasses.forEach {
                 writer.appendLine("import ${it.qualifiedName!!.asString()}")
             }
