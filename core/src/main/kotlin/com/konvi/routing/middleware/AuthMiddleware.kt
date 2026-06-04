@@ -10,7 +10,6 @@ import com.konvi.routing.Middleware
 import io.ktor.http.HttpHeaders
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.plugin
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.basicAuthenticationCredentials
 import io.ktor.server.auth.parseAuthorizationHeader
