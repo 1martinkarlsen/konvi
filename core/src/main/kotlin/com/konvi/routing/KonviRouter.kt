@@ -134,40 +134,74 @@ class KonviRoutingBuilder(
         path: String,
         handler: suspend RoutingCall.() -> Unit,
         vararg middlewares: suspend (ApplicationCall) -> Unit
-    ) = routing.create(path = path, middlewares = groupMiddlewares + middlewares.toList(), block = { delete { handler(call) } })
+    ) = routing.create(
+        path = path,
+        middlewares = groupMiddlewares + middlewares.toList(),
+        block = { delete { handler(call) } }
+    )
 
     fun delete(path: Regex, handler: suspend RoutingCall.() -> Unit) =
-        routing.create(path = path, middlewares = groupMiddlewares, block = { delete { handler(call) } })
+        routing.create(
+            path = path,
+            middlewares = groupMiddlewares,
+            block = { delete { handler(call) } }
+        )
 
     fun delete(
         path: Regex,
         handler: suspend RoutingCall.() -> Unit,
         vararg middlewares: suspend (ApplicationCall) -> Unit
-    ) = routing.create(path = path, middlewares = groupMiddlewares + middlewares.toList(), block = { delete { handler(call) } })
+    ) = routing.create(
+        path = path,
+        middlewares = groupMiddlewares + middlewares.toList(),
+        block = { delete { handler(call) } }
+    )
 
     fun patch(path: String, handler: suspend RoutingCall.() -> Unit) =
-        routing.create(path = path, middlewares = groupMiddlewares, block = { patch { handler(call) } })
+        routing.create(
+            path = path,
+            middlewares = groupMiddlewares,
+            block = { patch { handler(call) } }
+        )
 
     fun patch(
         path: String,
         handler: suspend RoutingCall.() -> Unit,
         vararg middlewares: suspend (ApplicationCall) -> Unit
-    ) = routing.create(path = path, middlewares = groupMiddlewares + middlewares.toList(), block = { patch { handler(call) } })
+    ) = routing.create(
+        path = path,
+        middlewares = groupMiddlewares + middlewares.toList(),
+        block = { patch { handler(call) } }
+    )
 
     fun patch(path: Regex, handler: suspend RoutingCall.() -> Unit) =
-        routing.create(path = path, middlewares = groupMiddlewares, block = { patch { handler(call) } })
+        routing.create(
+            path = path,
+            middlewares = groupMiddlewares,
+            block = { patch { handler(call) } }
+        )
 
     fun patch(
         path: Regex,
         handler: suspend RoutingCall.() -> Unit,
         vararg middlewares: suspend (ApplicationCall) -> Unit
-    ) = routing.create(path = path, middlewares = groupMiddlewares + middlewares.toList(), block = { patch { handler(call) } })
+    ) = routing.create(
+        path = path,
+        middlewares = groupMiddlewares + middlewares.toList(),
+        block = { patch { handler(call) } }
+    )
 
-    fun group(path: String, vararg middleware: suspend (ApplicationCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
-        routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
+    fun group(
+        path: String,
+        vararg middleware: suspend (ApplicationCall) -> Unit,
+        block: KonviRoutingBuilder.() -> Unit
+    ) = routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
 
-    fun group(path: Regex, vararg middleware: suspend (ApplicationCall) -> Unit, block: KonviRoutingBuilder.() -> Unit) =
-        routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
+    fun group(
+        path: Regex,
+        vararg middleware: suspend (ApplicationCall) -> Unit,
+        block: KonviRoutingBuilder.() -> Unit
+    ) = routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
 
     fun staticResources(remotePath: String, localPath: String) =
         routing.staticResources(remotePath, localPath)

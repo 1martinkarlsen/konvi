@@ -7,6 +7,8 @@ import com.konvi.config.AuthConfig
 import me.tatarka.inject.annotations.Inject
 import java.util.Date
 
+private const val SECONDS = 1000
+
 /**
  * Issues and verifies HMAC-signed JWTs using `konvi.auth.jwt` configuration.
  * Inject this to mint tokens (e.g. in a login route): `jwtService.issue(subject = user.id.toString())`.
@@ -29,7 +31,7 @@ class JwtService(authConfig: AuthConfig) {
             .withAudience(config.audience)
             .withSubject(subject)
             .withIssuedAt(Date(now))
-            .withExpiresAt(Date(now + config.expiresInSeconds * 1000))
+            .withExpiresAt(Date(now + config.expiresInSeconds * SECONDS))
         claims.forEach { (key, value) -> builder.withClaim(key, value) }
         return builder.sign(algorithm)
     }

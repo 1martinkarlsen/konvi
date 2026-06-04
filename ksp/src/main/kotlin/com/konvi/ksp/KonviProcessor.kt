@@ -120,7 +120,10 @@ class KonviProcessor(
                             "${scheme.interfaceName} = impl"
                     )
                 } else {
-                    writer.appendLine("    fun ${scheme.provideFunction}(): ${scheme.interfaceName} = ${scheme.denyAllName}")
+                    writer.appendLine("    fun " +
+                            "${scheme.provideFunction}(): " +
+                            "${scheme.interfaceName} = " +
+                            "${scheme.denyAllName}")
                 }
             }
             writer.appendLine("}")
