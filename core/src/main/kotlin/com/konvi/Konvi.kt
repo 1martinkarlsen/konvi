@@ -28,7 +28,8 @@ object Konvi {
             configureTemplate()
             configureHttp(
                 corsConfig = config.cors,
-                authConfig = config.auth
+                authConfig = config.auth,
+                authenticator = component.basicAuthenticator
             )
 
             routing {

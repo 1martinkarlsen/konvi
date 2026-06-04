@@ -1,5 +1,6 @@
 package com.konvi.http
 
+import com.konvi.auth.BasicAuthenticator
 import com.konvi.config.AuthConfig
 import com.konvi.config.CorsConfig
 import io.ktor.http.HttpHeaders
@@ -14,7 +15,8 @@ import kotlin.time.Duration.Companion.seconds
 
 internal fun Application.configureHttp(
     corsConfig: CorsConfig,
-    authConfig: AuthConfig
+    authConfig: AuthConfig,
+    authenticator: BasicAuthenticator
 ) {
     install(CORS) {
         allowMethod(HttpMethod.Options)
@@ -38,6 +40,9 @@ internal fun Application.configureHttp(
     install(Authentication) {
         basic("auth-basic") {
             realm = authConfig.basic.realm
+            validate { credential ->
+                authenticator.authenticate(credential.name, credential.password)
+            }
         }
     }
 }

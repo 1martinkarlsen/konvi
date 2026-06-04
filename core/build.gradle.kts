@@ -13,6 +13,7 @@ dependencies {
     api(ktorLibs.server.core)
     api(ktorLibs.server.netty)
     implementation(ktorLibs.server.auth)
+    implementation(ktorLibs.server.auth.jwt)
     implementation(ktorLibs.server.config.yaml)
     implementation(ktorLibs.server.cors)
     implementation(ktorLibs.server.statusPages)

@@ -7,6 +7,7 @@ internal fun loadConfig(): Config {
 
     fun str(path: String, default: String) = yaml?.propertyOrNull(path)?.getString() ?: default
     fun int(path: String, default: Int) = yaml?.propertyOrNull(path)?.getString()?.toIntOrNull() ?: default
+    fun long(path: String, default: Long) = yaml?.propertyOrNull(path)?.getString()?.toLongOrNull() ?: default
     fun list(path: String) = yaml?.propertyOrNull(path)?.getList() ?: emptyList()
 
     return Config(
@@ -21,7 +22,14 @@ internal fun loadConfig(): Config {
             allowedOrigins = list("konvi.cors.allowedOrigins")
         ),
         auth = AuthConfig(
-            basic = BasicAuthConfig(str("konvi.auth.basic.realm", default = "Konvi"))
+            basic = BasicAuthConfig(str("konvi.auth.basic.realm", default = "Konvi")),
+            jwt = JwtAuthConfig(
+                secret = str("konvi.auth.jwt.secret", default = "change-me"),
+                issuer = str("konvi.auth.jwt.issuer", default = "konvi"),
+                audience = str("konvi.auth.jwt.audience", default = "konvi"),
+                realm = str("konvi.auth.jwt.realm", default = "Konvi"),
+                expiresInSeconds = long("konvi.auth.jwt.expiresInSeconds", default = 3600)
+            )
         )
     )
 }

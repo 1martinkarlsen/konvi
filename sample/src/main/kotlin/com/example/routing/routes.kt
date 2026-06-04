@@ -11,7 +11,14 @@ fun Routes.api() = router {
     get("/users", userController::getAll, logMiddleware::test, authMiddleware::basic)
     get("/users/{id}", userController::find)
 
-    group("/admin", logMiddleware::test) {
+    // Basic auth
+    get("/me", userController::me, authMiddleware::basic)
+
+    // JWT auth: obtain a token at /login, then call /profile with `Authorization: Bearer <token>`
+    post("/login", authController::login)
+    get("/profile", userController::me, authMiddleware::jwt)
+
+    group("/admin", logMiddleware::test, authMiddleware::basic) {
         get("/dashboard") {
             println("DASHBOARD")
             view("index")
