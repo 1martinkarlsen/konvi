@@ -15,21 +15,8 @@ private const val AUTHENTICATOR = "com.konvi.routing.Authenticator"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "Routes"
 
-/**
- * An authentication scheme that can be plugged in via [AUTHENTICATOR]. To add a new scheme,
- * add an entry here and a matching middleware method on AuthMiddleware.
- */
-private data class Scheme(
-    val interfaceFqn: String,
-    val denyAllFqn: String,
-    val provideFunction: String
-) {
-    val interfaceName get() = interfaceFqn.substringAfterLast('.')
-    val denyAllName get() = denyAllFqn.substringAfterLast('.')
-}
-
 private val SCHEMES = listOf(
-    Scheme("com.konvi.auth.BasicAuthenticator", "com.konvi.auth.DenyAllAuthenticator", "provideBasicAuthenticator"),
+    Scheme("com.konvi.auth.BasicAuthenticator", "com.konvi.auth.DenyAllBasicAuthenticator", "provideBasicAuthenticator"),
     Scheme("com.konvi.auth.JwtAuthenticator", "com.konvi.auth.DenyAllJwtAuthenticator", "provideJwtAuthenticator")
 )
 

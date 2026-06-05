@@ -10,6 +10,6 @@ fun interface BasicAuthenticator {
 }
 
 /** Default binding used when no [com.konvi.routing.Authenticator] is provided. Rejects everything. */
-object DenyAllAuthenticator : BasicAuthenticator {
+object DenyAllBasicAuthenticator : BasicAuthenticator {
     override suspend fun authenticate(username: String, password: String): Any? = null
 }
