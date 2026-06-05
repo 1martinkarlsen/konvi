@@ -1,4 +1,4 @@
-package com.konvi.auth
+package com.konvi.auth.jwt
 
 import com.auth0.jwt.interfaces.Payload
 

@@ -30,7 +30,8 @@ object Konvi {
                 corsConfig = config.cors,
                 authConfig = config.auth,
                 basicAuthenticator = component.basicAuthenticator,
-                jwtAuthenticator = component.jwtAuthenticator
+                jwtAuthenticator = component.jwtAuthenticator,
+                jwtService = component.jwtService
             )
 
             routing {

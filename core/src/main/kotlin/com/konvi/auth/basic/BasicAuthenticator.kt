@@ -1,4 +1,4 @@
-package com.konvi.auth
+package com.konvi.auth.basic
 
 /**
  * Validates Basic credentials. Implement this in your application and annotate the

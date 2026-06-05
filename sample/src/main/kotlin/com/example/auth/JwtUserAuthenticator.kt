@@ -1,8 +1,8 @@
 package com.example.auth
 
 import com.example.repositories.UserRepository
-import com.konvi.auth.JwtAuthenticator
-import com.konvi.auth.JwtClaims
+import com.konvi.auth.jwt.JwtAuthenticator
+import com.konvi.auth.jwt.JwtClaims
 import com.konvi.routing.Authenticator
 import me.tatarka.inject.annotations.Inject
 

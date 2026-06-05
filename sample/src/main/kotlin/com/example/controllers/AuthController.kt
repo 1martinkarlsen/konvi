@@ -1,7 +1,7 @@
 package com.example.controllers
 
 import com.example.repositories.UserRepository
-import com.konvi.auth.JwtService
+import com.konvi.auth.jwt.JwtService
 import com.konvi.http.unauthorized
 import com.konvi.routing.Route
 import io.ktor.server.request.receive

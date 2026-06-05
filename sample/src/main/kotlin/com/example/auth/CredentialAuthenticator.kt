@@ -1,7 +1,7 @@
 package com.example.auth
 
 import com.example.repositories.UserRepository
-import com.konvi.auth.BasicAuthenticator
+import com.konvi.auth.basic.BasicAuthenticator
 import com.konvi.routing.Authenticator
 import me.tatarka.inject.annotations.Inject
 

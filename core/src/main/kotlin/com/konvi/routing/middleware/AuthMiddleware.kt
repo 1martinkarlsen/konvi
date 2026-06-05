@@ -1,9 +1,9 @@
 package com.konvi.routing.middleware
 
-import com.konvi.auth.BasicAuthenticator
-import com.konvi.auth.JwtAuthenticator
-import com.konvi.auth.JwtClaims
-import com.konvi.auth.JwtService
+import com.konvi.auth.basic.BasicAuthenticator
+import com.konvi.auth.jwt.JwtAuthenticator
+import com.konvi.auth.jwt.JwtClaims
+import com.konvi.auth.jwt.JwtService
 import com.konvi.config.AuthConfig
 import com.konvi.exception.UnauthorizedException
 import com.konvi.routing.Middleware

@@ -8,7 +8,7 @@ data class AuthConfig(
 data class BasicAuthConfig(val realm: String)
 
 data class JwtAuthConfig(
-    val secret: String = "change-me",
+    val secret: String = "secret",
     val issuer: String = "konvi",
     val audience: String = "konvi",
     val realm: String = "Konvi",

@@ -16,8 +16,16 @@ private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "Routes"
 
 private val SCHEMES = listOf(
-    Scheme("com.konvi.auth.BasicAuthenticator", "com.konvi.auth.DenyAllBasicAuthenticator", "provideBasicAuthenticator"),
-    Scheme("com.konvi.auth.JwtAuthenticator", "com.konvi.auth.DenyAllJwtAuthenticator", "provideJwtAuthenticator")
+    Scheme(
+        interfaceFqn = "com.konvi.auth.basic.BasicAuthenticator",
+        denyAllFqn = "com.konvi.auth.basic.DenyAllBasicAuthenticator",
+        provideFunction = "provideBasicAuthenticator"
+    ),
+    Scheme(
+        interfaceFqn = "com.konvi.auth.jwt.JwtAuthenticator",
+        denyAllFqn = "com.konvi.auth.jwt.DenyAllJwtAuthenticator",
+        provideFunction = "provideJwtAuthenticator"
+    )
 )
 
 class KonviProcessor(

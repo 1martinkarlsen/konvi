@@ -1,4 +1,4 @@
-package com.konvi.auth
+package com.konvi.auth.jwt
 
 /**
  * Maps the verified claims of a JWT to an application principal. Implement this and annotate

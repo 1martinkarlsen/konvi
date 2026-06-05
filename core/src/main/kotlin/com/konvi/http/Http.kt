@@ -1,10 +1,9 @@
 package com.konvi.http
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.konvi.auth.BasicAuthenticator
-import com.konvi.auth.JwtAuthenticator
-import com.konvi.auth.JwtClaims
+import com.konvi.auth.basic.BasicAuthenticator
+import com.konvi.auth.jwt.JwtAuthenticator
+import com.konvi.auth.jwt.JwtClaims
+import com.konvi.auth.jwt.JwtService
 import com.konvi.config.AuthConfig
 import com.konvi.config.CorsConfig
 import io.ktor.http.HttpHeaders
@@ -22,7 +21,8 @@ internal fun Application.configureHttp(
     corsConfig: CorsConfig,
     authConfig: AuthConfig,
     basicAuthenticator: BasicAuthenticator,
-    jwtAuthenticator: JwtAuthenticator
+    jwtAuthenticator: JwtAuthenticator,
+    jwtService: JwtService
 ) {
     install(CORS) {
         allowMethod(HttpMethod.Options)
@@ -55,10 +55,7 @@ internal fun Application.configureHttp(
         jwt("auth-jwt") {
             realm = authConfig.jwt.realm
             verifier(
-                JWT.require(Algorithm.HMAC256(authConfig.jwt.secret))
-                    .withIssuer(authConfig.jwt.issuer)
-                    .withAudience(authConfig.jwt.audience)
-                    .build()
+                jwtService.verifier
             )
             validate { credential -> jwtAuthenticator.authenticate(JwtClaims(credential.payload)) }
         }
