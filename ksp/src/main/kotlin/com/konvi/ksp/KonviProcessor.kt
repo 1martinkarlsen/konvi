@@ -78,7 +78,6 @@ class KonviProcessor(
             .distinct()
             .toTypedArray()
 
-        @Suppress("SpreadOperator")
         codeGenerator.createNewFile(
             dependencies = Dependencies(aggregating = true, sources = sourceFiles),
             packageName = GENERATED_PACKAGE,

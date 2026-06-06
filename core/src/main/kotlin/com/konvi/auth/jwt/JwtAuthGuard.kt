@@ -25,7 +25,6 @@ class JwtAuthGuard @Inject constructor(
         if (principal != null) {
             call.authentication.principal(principal)
         } else {
-            // RFC 6750: omit the error code when no token was supplied; flag invalid_token otherwise.
             val realm = "Bearer realm=\"${authConfig.jwt.realm}\""
             val challenge = if (token == null) realm else "$realm, error=\"invalid_token\""
             call.response.header(HttpHeaders.WWWAuthenticate, challenge)

@@ -8,7 +8,7 @@ import com.konvi.config.AuthConfig
 import me.tatarka.inject.annotations.Inject
 import java.util.Date
 
-private const val SECONDS = 1000
+private const val MILLIS_PER_SECOND = 1000
 
 /**
  * Issues and verifies HMAC-signed JWTs using `konvi.auth.jwt` configuration.
@@ -19,7 +19,7 @@ class JwtService(authConfig: AuthConfig) {
     private val config = authConfig.jwt
     private val algorithm = Algorithm.HMAC256(config.secret)
 
-    val verifier = JWT.require(algorithm)
+    internal val verifier = JWT.require(algorithm)
         .withIssuer(config.issuer)
         .withAudience(config.audience)
         .build()
@@ -32,7 +32,7 @@ class JwtService(authConfig: AuthConfig) {
             .withAudience(config.audience)
             .withSubject(subject)
             .withIssuedAt(Date(now))
-            .withExpiresAt(Date(now + config.expiresInSeconds * SECONDS))
+            .withExpiresAt(Date(now + config.expiresInSeconds * MILLIS_PER_SECOND))
         claims.forEach { (key, value) -> builder.withClaim(key, value) }
         return builder.sign(algorithm)
     }
