@@ -1,6 +1,8 @@
 package com.example.controllers
 
+import com.example.models.User
 import com.example.services.UserService
+import com.konvi.auth.requireUser
 import com.konvi.routing.Route
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -13,6 +15,10 @@ class UserController @Inject constructor(private val userService: UserService) {
     suspend fun getAll(call: RoutingCall) {
         println("ROUTE CONTROLLER")
         call.respond(userService.getAll())
+    }
+
+    suspend fun me(call: RoutingCall) {
+        call.respond(call.requireUser<User>())
     }
 
     suspend fun find(call: RoutingCall) {

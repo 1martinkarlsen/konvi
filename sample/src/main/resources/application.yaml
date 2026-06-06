@@ -8,3 +8,10 @@ konvi:
   cors:
     allowedOrigins:
       - "http://localhost:3000"
+  auth:
+    jwt:
+      secret: ${JWT_SECRET:dev-secret-change-me}
+      issuer: konvi-sample
+      audience: konvi-sample
+      realm: Konvi
+      expiresInSeconds: 3600
