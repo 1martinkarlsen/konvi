@@ -1,4 +1,4 @@
-package com.konvi.routing
+package com.konvi.auth
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
