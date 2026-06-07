@@ -1,10 +1,9 @@
 package com.konvi.ksp
 
 /**
- * An authentication scheme that can be plugged in via [AUTHENTICATOR]. To add a new scheme,
- * add an entry here and a matching middleware method on AuthMiddleware.
+ * AuthScheme represents the interface used for authentication in a scheme (basic, jwt etc).
  */
-internal data class Scheme(
+internal data class AuthScheme(
     val interfaceFqn: String,
     val denyAllFqn: String,
     val provideFunction: String

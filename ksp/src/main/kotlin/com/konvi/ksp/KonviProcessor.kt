@@ -8,20 +8,21 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import java.io.BufferedWriter
 
-private const val ROUTE = "com.konvi.routing.Route"
-private const val MIDDLEWARE = "com.konvi.routing.Middleware"
-private const val AUTHENTICATOR = "com.konvi.routing.Authenticator"
+private const val ROUTE_ANNOTATION = "com.konvi.routing.Route"
+private const val MIDDLEWARE_ANNOTATION = "com.konvi.routing.Middleware"
+private const val AUTHENTICATOR_ANNOTATION = "com.konvi.routing.Authenticator"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
-private const val GENERATED_FILE = "Routes"
+private const val GENERATED_FILE = "AppComponent"
 
-private val SCHEMES = listOf(
-    Scheme(
+private val AUTHENTICATION_SCHEMES = listOf(
+    AuthScheme(
         interfaceFqn = "com.konvi.auth.basic.BasicAuthenticator",
         denyAllFqn = "com.konvi.auth.basic.DenyAllBasicAuthenticator",
         provideFunction = "provideBasicAuthenticator"
     ),
-    Scheme(
+    AuthScheme(
         interfaceFqn = "com.konvi.auth.jwt.JwtAuthenticator",
         denyAllFqn = "com.konvi.auth.jwt.DenyAllJwtAuthenticator",
         provideFunction = "provideJwtAuthenticator"
@@ -34,18 +35,18 @@ class KonviProcessor(
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val routes = resolver.classesAnnotatedWith(ROUTE)
-        val middlewares = resolver.classesAnnotatedWith(MIDDLEWARE)
-        val authenticators = resolver.classesAnnotatedWith(AUTHENTICATOR)
+        val routes = resolver.classesAnnotatedWith(ROUTE_ANNOTATION)
+        val middlewares = resolver.classesAnnotatedWith(MIDDLEWARE_ANNOTATION)
+        val authenticators = resolver.classesAnnotatedWith(AUTHENTICATOR_ANNOTATION)
 
         // Resolve each @Authenticator to the scheme it implements (at most one impl per scheme).
-        val implByScheme = mutableMapOf<Scheme, KSClassDeclaration>()
+        val implByScheme = mutableMapOf<AuthScheme, KSClassDeclaration>()
         for (authenticator in authenticators) {
-            val scheme = SCHEMES.firstOrNull { authenticator.implements(it.interfaceFqn) }
+            val scheme = AUTHENTICATION_SCHEMES.firstOrNull { authenticator.implements(it.interfaceFqn) }
             if (scheme == null) {
                 logger.error(
                     "@Authenticator ${authenticator.fqn()} must implement one of: " +
-                        SCHEMES.joinToString { it.interfaceName },
+                            AUTHENTICATION_SCHEMES.joinToString { it.interfaceName },
                     authenticator
                 )
                 continue
@@ -70,7 +71,7 @@ class KonviProcessor(
     private fun generateComponent(
         routes: List<KSClassDeclaration>,
         middlewares: List<KSClassDeclaration>,
-        implByScheme: Map<Scheme, KSClassDeclaration>
+        implByScheme: Map<AuthScheme, KSClassDeclaration>
     ) {
         val exposedClasses = routes + middlewares
         val sourceFiles = (exposedClasses + implByScheme.values)
@@ -90,7 +91,7 @@ class KonviProcessor(
             writer.appendLine("import com.konvi.di.KonviComponent")
             writer.appendLine("import com.konvi.Konvi")
             writer.appendLine("import com.konvi.routing.KonviRouter")
-            SCHEMES.forEach { scheme ->
+            AUTHENTICATION_SCHEMES.forEach { scheme ->
                 writer.appendLine("import ${scheme.interfaceFqn}")
                 if (implByScheme[scheme] == null) writer.appendLine("import ${scheme.denyAllFqn}")
             }
@@ -99,31 +100,44 @@ class KonviProcessor(
             }
             writer.appendLine()
             writer.appendLine("@Component")
-            writer.appendLine("abstract class Routes : KonviComponent() {")
+            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent() {")
             exposedClasses.forEach {
                 val name = it.simpleName.asString()
                 writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
             }
-            SCHEMES.forEach { scheme ->
-                writer.appendLine()
-                writer.appendLine("    @Provides")
-                val impl = implByScheme[scheme]
-                if (impl != null) {
-                    writer.appendLine(
-                        "    fun ${scheme.provideFunction}(impl: ${impl.simpleName.asString()}): " +
-                            "${scheme.interfaceName} = impl"
-                    )
-                } else {
-                    writer.appendLine("    fun " +
-                            "${scheme.provideFunction}(): " +
-                            "${scheme.interfaceName} = " +
-                            "${scheme.denyAllName}")
-                }
-            }
+
+            //
+            provideAuthenticators(
+                writer = writer,
+                implByScheme = implByScheme,
+            )
+
             writer.appendLine("}")
             writer.appendLine()
-            writer.appendLine("fun konviStart(routes: Routes.() -> KonviRouter) =")
-            writer.appendLine("    Konvi.start(Routes::class.create(), routes)")
+            writer.appendLine("fun konviStart(routes: $GENERATED_FILE.() -> KonviRouter) =")
+            writer.appendLine("    Konvi.start($GENERATED_FILE::class.create(), routes)")
+        }
+    }
+
+    private fun provideAuthenticators(
+        writer: BufferedWriter,
+        implByScheme: Map<AuthScheme, KSClassDeclaration>
+    ) {
+        AUTHENTICATION_SCHEMES.forEach { scheme ->
+            writer.appendLine()
+            writer.appendLine("    @Provides")
+            val impl = implByScheme[scheme]
+            if (impl != null) {
+                writer.appendLine(
+                    "    fun ${scheme.provideFunction}(impl: ${impl.simpleName.asString()}): " +
+                            "${scheme.interfaceName} = impl"
+                )
+            } else {
+                writer.appendLine("    fun " +
+                        "${scheme.provideFunction}(): " +
+                        "${scheme.interfaceName} = " +
+                        "${scheme.denyAllName}")
+            }
         }
     }
 
