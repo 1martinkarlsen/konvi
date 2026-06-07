@@ -1,26 +1,31 @@
 package com.konvi.http
 
-import com.konvi.auth.basic.BasicAuthGuard
-import com.konvi.auth.jwt.JwtAuthGuard
+import com.konvi.auth.basic.BasicAuthenticator
+import com.konvi.auth.jwt.JwtAuthenticator
+import com.konvi.auth.jwt.JwtClaims
 import com.konvi.auth.jwt.JwtService
 import com.konvi.config.AuthConfig
 import com.konvi.config.CorsConfig
+import com.konvi.exception.UnauthorizedException
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.basic
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.ratelimit.RateLimit
+import io.ktor.server.response.header
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Application.configureHttp(
     corsConfig: CorsConfig,
     authConfig: AuthConfig,
-    basicAuthGuard: BasicAuthGuard,
-    jwtAuthGuard: JwtAuthGuard,
+    basicAuthenticator: BasicAuthenticator,
+    jwtAuthenticator: JwtAuthenticator,
     jwtService: JwtService
 ) {
     install(CORS) {
@@ -47,8 +52,14 @@ internal fun Application.configureHttp(
     install(Authentication) {
         basic("auth-basic") {
             realm = authConfig.basic.realm
-            validate { _ ->
-                basicAuthGuard.authenticate(this)
+            validate { credential ->
+                val principal = basicAuthenticator.authenticate(credential.name, credential.password)
+                if (principal != null) {
+                    UserIdPrincipal(credential.name)
+                } else {
+                    response.header(HttpHeaders.WWWAuthenticate, "Basic realm=\"${authConfig.basic.realm}\"")
+                    throw UnauthorizedException()
+                }
             }
         }
         jwt("auth-jwt") {
@@ -56,8 +67,13 @@ internal fun Application.configureHttp(
             verifier(
                 jwtService.verifier
             )
-            validate { _ ->
-                jwtAuthGuard.authenticate(this)
+            validate { credential ->
+                val principal = jwtAuthenticator.authenticate(JwtClaims(credential.payload))
+                if (principal != null) {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    throw UnauthorizedException()
+                }
             }
         }
     }

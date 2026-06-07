@@ -1,7 +1,7 @@
 package com.konvi.di
 
-import com.konvi.auth.basic.BasicAuthGuard
-import com.konvi.auth.jwt.JwtAuthGuard
+import com.konvi.auth.basic.BasicAuthenticator
+import com.konvi.auth.jwt.JwtAuthenticator
 import com.konvi.auth.jwt.JwtService
 import com.konvi.config.AuthConfig
 import com.konvi.config.loadConfig
@@ -10,8 +10,8 @@ import me.tatarka.inject.annotations.Provides
 
 abstract class KonviComponent {
     abstract val authMiddleware: AuthMiddleware
-    abstract val basicAuthGuard: BasicAuthGuard
-    abstract val jwtAuthGuard: JwtAuthGuard
+    abstract val basicAuthenticator: BasicAuthenticator
+    abstract val jwtAuthenticator: JwtAuthenticator
     abstract val jwtService: JwtService
 
     @Provides
