@@ -1,16 +1,20 @@
 package com.konvi.auth.jwt
 
 import com.konvi.auth.AuthGuard
+import com.konvi.config.AuthConfig
 import com.konvi.exception.UnauthorizedException
+import io.ktor.http.HttpHeaders
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.parseAuthorizationHeader
+import io.ktor.server.response.header
 import me.tatarka.inject.annotations.Inject
 
 class JwtAuthGuard @Inject constructor(
     private val jwtAuthenticator: JwtAuthenticator,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val authConfig: AuthConfig
 ) : AuthGuard {
 
     override suspend fun authenticate(call: ApplicationCall) {
@@ -21,6 +25,9 @@ class JwtAuthGuard @Inject constructor(
         if (principal != null) {
             call.authentication.principal(principal)
         } else {
+            val realm = "Bearer realm=\"${authConfig.jwt.realm}\""
+            val challenge = if (token == null) realm else "$realm, error=\"invalid_token\""
+            call.response.header(HttpHeaders.WWWAuthenticate, challenge)
             throw UnauthorizedException()
         }
     }
