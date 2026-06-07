@@ -12,8 +12,9 @@ import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.authentication
+import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.basic
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.ratelimit.RateLimit
@@ -54,7 +55,7 @@ internal fun Application.configureHttp(
             validate { credential ->
                 val principal = basicAuthenticator.authenticate(credential.name, credential.password)
                 if (principal != null) {
-                    authentication.principal(principal)
+                    UserIdPrincipal(credential.name)
                 } else {
                     response.header(HttpHeaders.WWWAuthenticate, "Basic realm=\"${authConfig.basic.realm}\"")
                     throw UnauthorizedException()
@@ -69,10 +70,8 @@ internal fun Application.configureHttp(
             validate { credential ->
                 val principal = jwtAuthenticator.authenticate(JwtClaims(credential.payload))
                 if (principal != null) {
-                    authentication.principal(principal)
+                    JWTPrincipal(credential.payload)
                 } else {
-                    val realm = "Bearer realm=\"${authConfig.jwt.realm}\""
-                    response.header(HttpHeaders.WWWAuthenticate, realm)
                     throw UnauthorizedException()
                 }
             }

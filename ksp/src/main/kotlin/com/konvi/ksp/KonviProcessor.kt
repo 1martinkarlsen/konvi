@@ -12,7 +12,7 @@ import java.io.BufferedWriter
 
 private const val ROUTE_ANNOTATION = "com.konvi.routing.Route"
 private const val MIDDLEWARE_ANNOTATION = "com.konvi.routing.Middleware"
-private const val AUTHENTICATOR_ANNOTATION = "com.konvi.routing.Authenticator"
+private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
 
