@@ -77,4 +77,54 @@ class MiddlewareIntegrationTest {
         assertFalse(secondRan, "later middleware must not run")
         assertFalse(handlerRan, "handler must not run")
     }
+
+    @Test
+    fun `middleware does not leak to a sibling sub-path route`() = testApplication {
+        var middlewareRan = false
+        val blocker: suspend (ApplicationCall) -> Unit = {
+            middlewareRan = true
+            it.respond(HttpStatusCode.Forbidden, "BLOCKED")
+        }
+        val konvi = router {
+            get("/users", handler = { respond(HttpStatusCode.OK, "ALL") }, blocker)
+            get("/users/{id}", handler = { respond(HttpStatusCode.OK, "ONE") })
+        }
+        application { routing { konvi.block(this) } }
+
+        val protected = client.get("/users")
+        assertEquals(HttpStatusCode.Forbidden, protected.status, "middleware should guard GET /users")
+        assertEquals("BLOCKED", protected.bodyAsText())
+
+        middlewareRan = false
+        val sibling = client.get("/users/123")
+        assertFalse(middlewareRan, "middleware on /users must not run for the /users/{id} sibling")
+        assertEquals(HttpStatusCode.OK, sibling.status)
+        assertEquals("ONE", sibling.bodyAsText())
+    }
+
+    @Test
+    fun `group middleware does not leak to a sibling route outside the group`() = testApplication {
+        var middlewareRan = false
+        val blocker: suspend (ApplicationCall) -> Unit = {
+            middlewareRan = true
+            it.respond(HttpStatusCode.Forbidden, "BLOCKED")
+        }
+        val konvi = router {
+            group("/admin", blocker) {
+                get("/dashboard", handler = { respond(HttpStatusCode.OK, "DASH") })
+            }
+            get("/admin/{id}", handler = { respond(HttpStatusCode.OK, "ONE") })
+        }
+        application { routing { konvi.block(this) } }
+
+        val protected = client.get("/admin/dashboard")
+        assertEquals(HttpStatusCode.Forbidden, protected.status, "group middleware should guard routes inside the group")
+        assertEquals("BLOCKED", protected.bodyAsText())
+
+        middlewareRan = false
+        val sibling = client.get("/admin/123")
+        assertFalse(middlewareRan, "group middleware must not run for a sibling route outside the group")
+        assertEquals(HttpStatusCode.OK, sibling.status)
+        assertEquals("ONE", sibling.bodyAsText())
+    }
 }
