@@ -3,6 +3,8 @@ package com.example.routing
 import com.konvi.generated.AppComponent
 import com.konvi.routing.router
 import com.konvi.template.view
+import io.ktor.server.auth.authenticate
+import io.ktor.server.routing.get
 
 fun AppComponent.api() = router {
     get("/") {
@@ -23,5 +25,13 @@ fun AppComponent.api() = router {
             println("DASHBOARD")
             view("index")
         }
+    }
+
+    routing {
+        authenticate("auth-basic") {
+            get("/test") {  }
+        }
+
+        get("/test/{id}") {  }
     }
 }

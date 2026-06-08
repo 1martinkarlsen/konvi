@@ -213,27 +213,27 @@ class KonviRoutingBuilder(
 private fun Route.create(
     path: String,
     middlewares: List<suspend (ApplicationCall) -> Unit>,
-    block: Route.() -> Unit
+    block: Route.() -> Route
 ) = route(path) {
+    val routeChild = block()
     if (middlewares.isNotEmpty()) {
-        install(MiddlewarePlugin) {
+        routeChild.install(MiddlewarePlugin) {
             this.middlewares.addAll(middlewares)
         }
     }
-    block()
 }
 
 private fun Route.create(
     path: Regex,
     middlewares: List<suspend (ApplicationCall) -> Unit>,
-    block: Route.() -> Unit
+    block: Route.() -> Route
 ) = route(path) {
+    val routeChild = block()
     if (middlewares.isNotEmpty()) {
-        install(MiddlewarePlugin) {
+        routeChild.install(MiddlewarePlugin) {
             this.middlewares.addAll(middlewares)
         }
     }
-    block()
 }
 
 fun router(block: KonviRoutingBuilder.() -> Unit) = KonviRouter {
