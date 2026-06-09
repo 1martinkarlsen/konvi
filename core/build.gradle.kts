@@ -3,10 +3,19 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     `java-library`
+    `maven-publish`
 }
 
 kotlin {
     jvmToolchain(libs.versions.jvm.get().toInt())
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])   // artifactId defaults to the module name, e.g. "core"
+        }
+    }
 }
 
 dependencies {
