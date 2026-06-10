@@ -89,8 +89,6 @@ class KonviProcessor(
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
             writer.appendLine("import com.konvi.di.KonviComponent")
-            writer.appendLine("import com.konvi.Konvi")
-            writer.appendLine("import com.konvi.routing.KonviRouter")
             AUTHENTICATION_SCHEMES.forEach { scheme ->
                 writer.appendLine("import ${scheme.interfaceFqn}")
                 if (implByScheme[scheme] == null) writer.appendLine("import ${scheme.denyAllFqn}")
@@ -113,9 +111,6 @@ class KonviProcessor(
             )
 
             writer.appendLine("}")
-            writer.appendLine()
-            writer.appendLine("fun konviStart(routes: $GENERATED_FILE.() -> KonviRouter) =")
-            writer.appendLine("    Konvi.start($GENERATED_FILE::class.create(), routes)")
         }
     }
 
