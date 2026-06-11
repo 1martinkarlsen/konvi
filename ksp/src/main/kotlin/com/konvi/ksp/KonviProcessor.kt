@@ -34,7 +34,16 @@ class KonviProcessor(
     private val logger: KSPLogger
 ) : SymbolProcessor {
 
+    // The component is an aggregating output built from all annotated classes, which are all
+    // resolvable in the first round. Generating again in later KSP rounds would try to recreate
+    // AppComponent.kt and fail with FileAlreadyExistsException, so generate exactly once. The flag
+    // is per-build (a fresh processor is created each compilation), so edits still regenerate.
+    private var invoked = false
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (invoked) return emptyList()
+        invoked = true
+
         val routes = resolver.classesAnnotatedWith(ROUTE_ANNOTATION)
         val middlewares = resolver.classesAnnotatedWith(MIDDLEWARE_ANNOTATION)
         val authenticators = resolver.classesAnnotatedWith(AUTHENTICATOR_ANNOTATION)
@@ -61,9 +70,7 @@ class KonviProcessor(
             }
         }
 
-        if (routes.isNotEmpty() || middlewares.isNotEmpty() || authenticators.isNotEmpty()) {
-            generateComponent(routes, middlewares, implByScheme)
-        }
+        generateComponent(routes, middlewares, implByScheme)
 
         return emptyList()
     }
