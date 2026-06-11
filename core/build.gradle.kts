@@ -44,6 +44,8 @@ dependencies {
     api(libs.exposed.kotlin.datetime)
     api(libs.hikaricp)
 
+    runtimeOnly(libs.h2)
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 }
