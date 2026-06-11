@@ -53,5 +53,5 @@ private fun loadGeneratedComponent(): KonviComponent =
     try {
         Class.forName(GENERATED_COMPONENT).getDeclaredConstructor().newInstance() as KonviComponent
     } catch (e: ClassNotFoundException) {
-        error("Generated Konvi component '$GENERATED_COMPONENT' was not found.")
+        error("Generated Konvi component '$GENERATED_COMPONENT' was not found. ${e.message}")
     }
