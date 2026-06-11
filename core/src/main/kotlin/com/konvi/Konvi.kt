@@ -15,6 +15,8 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
 
+private const val GENERATED_COMPONENT = "com.konvi.generated.InjectAppComponent"
+
 object Konvi {
     fun <T : KonviComponent> start(component: T, routes: T.() -> KonviRouter) {
         val config = loadConfig()
@@ -40,3 +42,16 @@ object Konvi {
         }.start(wait = true)
     }
 }
+
+fun <T : KonviComponent> startKonvi(routes: T.() -> KonviRouter) {
+    @Suppress("UNCHECKED_CAST")
+    val component = loadGeneratedComponent() as T
+    Konvi.start(component, routes)
+}
+
+private fun loadGeneratedComponent(): KonviComponent =
+    try {
+        Class.forName(GENERATED_COMPONENT).getDeclaredConstructor().newInstance() as KonviComponent
+    } catch (e: ClassNotFoundException) {
+        error("Generated Konvi component '$GENERATED_COMPONENT' was not found. ${e.message}")
+    }

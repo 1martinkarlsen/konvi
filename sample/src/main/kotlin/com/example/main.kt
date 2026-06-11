@@ -2,6 +2,6 @@ package com.example
 
 import com.example.routing.api
 import com.konvi.generated.AppComponent
-import com.konvi.generated.konviStart
+import com.konvi.startKonvi
 
-fun main() = konviStart(AppComponent::api)
+fun main() = startKonvi(AppComponent::api)
