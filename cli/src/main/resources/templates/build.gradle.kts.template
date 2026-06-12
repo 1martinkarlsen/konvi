@@ -1,0 +1,32 @@
+plugins {
+    kotlin("jvm") version "2.3.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
+    id("com.konvi") version "0.1.0-SNAPSHOT"
+    application
+}
+
+group = "<basePackage>"
+version = "1.0.0-SNAPSHOT"
+
+application {
+    mainClass = "<basePackage>.MainKt"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.konvi:core:0.1.0-SNAPSHOT")
+
+    testImplementation(kotlin("test"))
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
