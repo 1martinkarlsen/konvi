@@ -17,10 +17,14 @@ class TemplateRenderer {
             if (entry.endsWith(TEMPLATE_SUFFIX)) {
                 outputFile.writeText(substitute(readText(entry), variables))
             } else {
-                openResource(entry).use { input ->
-                    outputFile.outputStream().use { output -> input.copyTo(output) }
-                }
+                copyResource(entry, outputFile)
             }
+        }
+    }
+
+    private fun copyResource(relativePath: String, target: Path) {
+        openResource(relativePath).use { input ->
+            target.outputStream().use { output -> input.copyTo(output) }
         }
     }
 
