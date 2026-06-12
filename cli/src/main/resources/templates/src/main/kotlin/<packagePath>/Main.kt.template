@@ -1,0 +1,8 @@
+package <basePackage>
+
+import com.konvi.generated.AppComponent
+
+import com.konvi.startKonvi
+import <basePackage>.routing.routing
+
+fun main() = startKonvi(AppComponent::routing)

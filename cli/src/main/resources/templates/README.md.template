@@ -1,0 +1,30 @@
+# <projectName>
+
+A web application built with the Konvi framework.
+
+## Prerequisites
+
+- **JDK 17 or newer**
+- **Gradle** — this project does not ship the Gradle wrapper. Install Gradle on your
+  machine (the intended version is pinned in `gradle/wrapper/gradle-wrapper.properties`).
+  With Gradle installed you can run `gradle wrapper` once to generate `./gradlew` if you
+  prefer using the wrapper.
+
+## Build
+
+```
+gradle build
+```
+
+## Run
+
+```
+gradle run
+```
+
+The entry point is the `main` function in `src/main/kotlin/<packagePath>/Main.kt`, which
+starts the server via `startKonvi`. You can also run it directly from your IDE.
+
+## Configuration
+
+App settings live in `src/main/resources/application.yaml` (e.g. the HTTP `port`).
