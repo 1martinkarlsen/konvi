@@ -6,6 +6,4 @@ import com.konvi.startKonvi
 
 fun main() = startKonvi(
     AppComponent::api
-) {
-
-}
+)

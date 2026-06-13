@@ -4,5 +4,5 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.Plugin
 
 interface PluginScope {
-    fun <C : Any, B : Any> install(plugin: Plugin<Application, B, C>, configure: B.() -> Unit = {})
+    fun <B : Any, F : Any> install(plugin: Plugin<Application, B, F>, configure: B.() -> Unit = {})
 }
