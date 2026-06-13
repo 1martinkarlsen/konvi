@@ -9,6 +9,7 @@ import com.konvi.config.CorsConfig
 import com.konvi.exception.UnauthorizedException
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
@@ -16,6 +17,7 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.ratelimit.RateLimit
 import io.ktor.server.response.header
@@ -28,6 +30,10 @@ internal fun Application.configureHttp(
     jwtAuthenticator: JwtAuthenticator,
     jwtService: JwtService
 ) {
+    install(ContentNegotiation) {
+        json()
+    }
+
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)

@@ -6,25 +6,28 @@ import com.konvi.di.KonviComponent
 import com.konvi.exception.configureExceptions
 import com.konvi.http.configureHttp
 import com.konvi.logging.configureLogging
+import com.konvi.plugins.PluginScope
 import com.konvi.routing.KonviRouter
 import com.konvi.routing.configureFrameworkRoutes
 import com.konvi.template.configureTemplate
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.Plugin
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
 
 private const val GENERATED_COMPONENT = "com.konvi.generated.InjectAppComponent"
 
 object Konvi {
-    fun <T : KonviComponent> start(component: T, routes: T.() -> KonviRouter) {
+    fun <T : KonviComponent> start(
+        component: T,
+        routes: T.() -> KonviRouter,
+        plugins: PluginScope.() -> Unit = {}
+    ) {
         val config = loadConfig()
 
         embeddedServer(Netty, port = config.port) {
-            install(ContentNegotiation) { json() }
-
             configureDatabase(config.database)
             configureLogging()
             configureExceptions()
@@ -37,6 +40,13 @@ object Konvi {
                 jwtService = component.jwtService
             )
 
+            val pluginScope = object : PluginScope {
+                override fun <C : Any, B : Any> install(plugin: Plugin<Application, B, C>, configure: B.() -> Unit) {
+                    this@embeddedServer.install(plugin, configure)
+                }
+            }
+            pluginScope.plugins()
+
             routing {
                 configureFrameworkRoutes().block(this)
                 component.routes().block(this)
@@ -45,10 +55,13 @@ object Konvi {
     }
 }
 
-fun <T : KonviComponent> startKonvi(routes: T.() -> KonviRouter) {
+fun <T : KonviComponent> startKonvi(
+    routes: T.() -> KonviRouter,
+    plugins: PluginScope.() -> Unit = {}
+) {
     @Suppress("UNCHECKED_CAST")
     val component = loadGeneratedComponent() as T
-    Konvi.start(component, routes)
+    Konvi.start(component, routes, plugins)
 }
 
 private fun loadGeneratedComponent(): KonviComponent =
