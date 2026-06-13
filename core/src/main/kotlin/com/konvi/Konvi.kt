@@ -41,7 +41,7 @@ object Konvi {
             )
 
             val pluginScope = object : PluginScope {
-                override fun <C : Any, B : Any> install(plugin: Plugin<Application, B, C>, configure: B.() -> Unit) {
+                override fun <B : Any, F : Any> install(plugin: Plugin<Application, B, F>, configure: B.() -> Unit) {
                     this@embeddedServer.install(plugin, configure)
                 }
             }
