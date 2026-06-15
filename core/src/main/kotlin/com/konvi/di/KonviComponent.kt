@@ -4,9 +4,11 @@ import com.konvi.auth.basic.BasicAuthenticator
 import com.konvi.auth.jwt.JwtAuthenticator
 import com.konvi.auth.jwt.JwtService
 import com.konvi.config.AuthConfig
+import com.konvi.config.DatabaseConfig
 import com.konvi.config.loadConfig
 import com.konvi.lifecycle.Lifecycle
 import com.konvi.routing.middleware.AuthMiddleware
+import com.zaxxer.hikari.HikariDataSource
 import me.tatarka.inject.annotations.Provides
 
 abstract class KonviComponent {
@@ -16,7 +18,16 @@ abstract class KonviComponent {
     abstract val jwtService: JwtService
 
     abstract val lifecycle: List<Lifecycle>
+    
+    abstract val hikariDataSource: HikariDataSource
 
     @Provides
     protected fun provideAuthConfig(): AuthConfig = loadConfig().auth
+    
+    @Provides
+    protected fun provideDatabaseConfig(): DatabaseConfig = loadConfig().database
+    
+    @Provides
+    protected fun provideHikariDataSource(dbConfig: DatabaseConfig): HikariDataSource = 
+        com.konvi.database.createHikariDataSource(dbConfig)
 }

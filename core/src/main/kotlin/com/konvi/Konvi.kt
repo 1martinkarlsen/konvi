@@ -31,7 +31,7 @@ object Konvi {
         val config = loadConfig()
 
         embeddedServer(Netty, port = config.port) {
-            configureDatabase(config.database)
+            configureDatabase(component.hikariDataSource)
             configureLogging()
             configureExceptions()
             configureTemplate()
