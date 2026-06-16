@@ -1,11 +1,13 @@
 package com.konvi.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import java.io.BufferedWriter
@@ -13,6 +15,7 @@ import java.io.BufferedWriter
 private const val ROUTE_ANNOTATION = "com.konvi.routing.Route"
 private const val MIDDLEWARE_ANNOTATION = "com.konvi.routing.Middleware"
 private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
+private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
 
@@ -47,6 +50,8 @@ class KonviProcessor(
         val routes = resolver.classesAnnotatedWith(ROUTE_ANNOTATION)
         val middlewares = resolver.classesAnnotatedWith(MIDDLEWARE_ANNOTATION)
         val authenticators = resolver.classesAnnotatedWith(AUTHENTICATOR_ANNOTATION)
+        val lifecycleHooks = resolver.classesWithInterface(LIFECYCLE_INTERFACE)
+
 
         // Resolve each @Authenticator to the scheme it implements (at most one impl per scheme).
         val implByScheme = mutableMapOf<AuthScheme, KSClassDeclaration>()
@@ -70,7 +75,12 @@ class KonviProcessor(
             }
         }
 
-        generateComponent(routes, middlewares, implByScheme)
+        generateComponent(
+            routes = routes,
+            middlewares = middlewares,
+            lifecycleHooks = lifecycleHooks,
+            implByScheme = implByScheme
+        )
 
         return emptyList()
     }
@@ -78,10 +88,11 @@ class KonviProcessor(
     private fun generateComponent(
         routes: List<KSClassDeclaration>,
         middlewares: List<KSClassDeclaration>,
+        lifecycleHooks: List<KSClassDeclaration>,
         implByScheme: Map<AuthScheme, KSClassDeclaration>
     ) {
         val exposedClasses = routes + middlewares
-        val sourceFiles = (exposedClasses + implByScheme.values)
+        val sourceFiles = (exposedClasses + implByScheme.values + lifecycleHooks)
             .mapNotNull { it.containingFile }
             .distinct()
             .toTypedArray()
@@ -96,11 +107,12 @@ class KonviProcessor(
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
             writer.appendLine("import com.konvi.di.KonviComponent")
+            writer.appendLine("import $LIFECYCLE_INTERFACE")
             AUTHENTICATION_SCHEMES.forEach { scheme ->
                 writer.appendLine("import ${scheme.interfaceFqn}")
                 if (implByScheme[scheme] == null) writer.appendLine("import ${scheme.denyAllFqn}")
             }
-            (exposedClasses + implByScheme.values).forEach {
+            (exposedClasses + implByScheme.values + lifecycleHooks).forEach {
                 writer.appendLine("import ${it.qualifiedName!!.asString()}")
             }
             writer.appendLine()
@@ -111,7 +123,11 @@ class KonviProcessor(
                 writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
             }
 
-            //
+            provideLifecycle(
+                writer = writer,
+                lifecycleHooks = lifecycleHooks,
+            )
+
             provideAuthenticators(
                 writer = writer,
                 implByScheme = implByScheme,
@@ -119,6 +135,26 @@ class KonviProcessor(
 
             writer.appendLine("}")
         }
+    }
+
+    // Collects every concrete Lifecycle implementation into the single List<Lifecycle> the
+    // KonviComponent exposes. Emits emptyList() when there are no hooks so apps without any
+    // still satisfy the binding.
+    private fun provideLifecycle(
+        writer: BufferedWriter,
+        lifecycleHooks: List<KSClassDeclaration>
+    ) {
+        writer.appendLine()
+        writer.appendLine("    @Provides")
+        if (lifecycleHooks.isEmpty()) {
+            writer.appendLine("    fun provideLifecycle(): List<Lifecycle> = emptyList()")
+            return
+        }
+        val params = lifecycleHooks
+            .mapIndexed { index, hook -> "p$index: ${hook.simpleName.asString()}" }
+            .joinToString()
+        val args = lifecycleHooks.indices.joinToString { "p$it" }
+        writer.appendLine("    fun provideLifecycle($params): List<Lifecycle> = listOf($args)")
     }
 
     private fun provideAuthenticators(
@@ -150,4 +186,13 @@ class KonviProcessor(
         getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == interfaceFqn }
 
     private fun KSClassDeclaration.fqn(): String = qualifiedName?.asString() ?: simpleName.asString()
+
+    // Discovers concrete classes implementing the given interface (directly or transitively).
+    // Abstract classes and interfaces are skipped since kotlin-inject can only construct concrete types.
+    private fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDeclaration> =
+        getAllFiles()
+            .flatMap { it.declarations }
+            .filterIsInstance<KSClassDeclaration>()
+            .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
+            .toList()
 }
