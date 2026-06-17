@@ -1,6 +1,13 @@
 package com.konvi.routing.integration
 
+import com.konvi.auth.basic.BasicAuthenticator
+import com.konvi.auth.jwt.JwtAuthenticator
+import com.konvi.auth.jwt.JwtService
+import com.konvi.di.KonviComponent
+import com.konvi.lifecycle.Lifecycle
+import com.konvi.routing.middleware.AuthMiddleware
 import com.konvi.routing.router
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -15,10 +22,21 @@ import kotlin.test.assertTrue
 
 class MiddlewareIntegrationTest {
 
+    private class TestComponent : KonviComponent() {
+        override val authMiddleware: AuthMiddleware get() = error("unused in routing tests")
+        override val basicAuthenticator: BasicAuthenticator get() = error("unused in routing tests")
+        override val jwtAuthenticator: JwtAuthenticator get() = error("unused in routing tests")
+        override val jwtService: JwtService get() = error("unused in routing tests")
+        override val lifecycle: List<Lifecycle> get() = emptyList()
+        override val hikariDataSource: HikariDataSource get() = error("unused in routing tests")
+    }
+
+    private val component = TestComponent()
+
     @Test
     fun `handler runs when there is no middleware`() = testApplication {
         var handlerRan = false
-        val konvi = router {
+        val konvi = component.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") })
         }
         application { routing { konvi.block(this) } }
@@ -33,7 +51,7 @@ class MiddlewareIntegrationTest {
     fun `passive middleware does not block the handler`() = testApplication {
         var handlerRan = false
         val passive: suspend (ApplicationCall) -> Unit = { /* does not respond */ }
-        val konvi = router {
+        val konvi = component.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") }, passive)
         }
         application { routing { konvi.block(this) } }
@@ -48,7 +66,7 @@ class MiddlewareIntegrationTest {
     fun `middleware that responds short-circuits the handler`() = testApplication {
         var handlerRan = false
         val blocker: suspend (ApplicationCall) -> Unit = { it.respond(HttpStatusCode.Forbidden, "BLOCKED") }
-        val konvi = router {
+        val konvi = component.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") }, blocker)
         }
         application { routing { konvi.block(this) } }
@@ -66,7 +84,7 @@ class MiddlewareIntegrationTest {
         var handlerRan = false
         val first: suspend (ApplicationCall) -> Unit = { it.respond(HttpStatusCode.Forbidden, "BLOCKED") }
         val second: suspend (ApplicationCall) -> Unit = { secondRan = true }
-        val konvi = router {
+        val konvi = component.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") }, first, second)
         }
         application { routing { konvi.block(this) } }
@@ -85,7 +103,7 @@ class MiddlewareIntegrationTest {
             middlewareRan = true
             it.respond(HttpStatusCode.Forbidden, "BLOCKED")
         }
-        val konvi = router {
+        val konvi = component.router {
             get("/users", handler = { respond(HttpStatusCode.OK, "ALL") }, blocker)
             get("/users/{id}", handler = { respond(HttpStatusCode.OK, "ONE") })
         }
@@ -109,7 +127,7 @@ class MiddlewareIntegrationTest {
             middlewareRan = true
             it.respond(HttpStatusCode.Forbidden, "BLOCKED")
         }
-        val konvi = router {
+        val konvi = component.router {
             group("/admin", blocker) {
                 get("/dashboard", handler = { respond(HttpStatusCode.OK, "DASH") })
             }
