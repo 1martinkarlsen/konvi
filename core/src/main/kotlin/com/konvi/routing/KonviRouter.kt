@@ -1,5 +1,6 @@
 package com.konvi.routing
 
+import com.konvi.di.KonviComponent
 import com.konvi.routing.middleware.MiddlewarePlugin
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.routing.Route
@@ -16,7 +17,8 @@ import io.ktor.server.http.content.staticResources
 class KonviRouter internal constructor(internal val block: Routing.() -> Unit)
 
 @Suppress("TooManyFunctions")
-class KonviRoutingBuilder(
+class KonviRoutingBuilder<C : KonviComponent>(
+    val component: C,
     private val routing: Route,
     private val groupMiddlewares: List<suspend (ApplicationCall) -> Unit> = emptyList()
 ) {
@@ -194,14 +196,26 @@ class KonviRoutingBuilder(
     fun group(
         path: String,
         vararg middleware: suspend (ApplicationCall) -> Unit,
-        block: KonviRoutingBuilder.() -> Unit
-    ) = routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
+        block: KonviRoutingBuilder<C>.() -> Unit
+    ) = routing.route(path) {
+        block(KonviRoutingBuilder(
+            component = component,
+            routing = this,
+            groupMiddlewares = groupMiddlewares + middleware.toList())
+        )
+    }
 
     fun group(
         path: Regex,
         vararg middleware: suspend (ApplicationCall) -> Unit,
-        block: KonviRoutingBuilder.() -> Unit
-    ) = routing.route(path) { block(KonviRoutingBuilder(this, groupMiddlewares + middleware.toList())) }
+        block: KonviRoutingBuilder<C>.() -> Unit
+    ) = routing.route(path) {
+        block(KonviRoutingBuilder<C>(
+            component = component,
+            routing = this,
+            groupMiddlewares = groupMiddlewares + middleware.toList())
+        )
+    }
 
     fun staticResources(remotePath: String, localPath: String) =
         routing.staticResources(remotePath, localPath)
@@ -236,6 +250,9 @@ private fun Route.create(
     }
 }
 
-fun router(block: KonviRoutingBuilder.() -> Unit) = KonviRouter {
-    KonviRoutingBuilder(this).apply(block)
+fun <C : KonviComponent> C.router(block: KonviRoutingBuilder<C>.() -> Unit) = KonviRouter {
+    KonviRoutingBuilder(
+        component = this@router,
+        routing = this
+    ).apply(block)
 }

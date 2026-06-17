@@ -1,5 +1,7 @@
 package com.konvi.routing
 
-internal fun configureFrameworkRoutes() = router {
+import com.konvi.di.KonviComponent
+
+internal fun KonviComponent.configureFrameworkRoutes() = router {
     staticResources("/static", "static")
 }
