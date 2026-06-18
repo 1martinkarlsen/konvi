@@ -107,6 +107,7 @@ class KonviProcessor(
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
             writer.appendLine("import com.konvi.di.KonviComponent")
+            writer.appendLine("import com.konvi.routing.KonviRoutingBuilder")
             writer.appendLine("import $LIFECYCLE_INTERFACE")
             AUTHENTICATION_SCHEMES.forEach { scheme ->
                 writer.appendLine("import ${scheme.interfaceFqn}")
@@ -134,6 +135,9 @@ class KonviProcessor(
             )
 
             writer.appendLine("}")
+
+            writer.appendLine()
+            writer.appendLine("typealias Routing = KonviRoutingBuilder<$GENERATED_FILE>")
         }
     }
 

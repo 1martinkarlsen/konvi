@@ -67,7 +67,7 @@ object Konvi {
             }
 
             routing {
-                configureFrameworkRoutes().block(this)
+                component.configureFrameworkRoutes().block(this)
                 component.routes().block(this)
             }
         }.start(wait = true)
