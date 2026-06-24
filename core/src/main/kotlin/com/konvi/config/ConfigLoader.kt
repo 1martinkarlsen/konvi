@@ -19,7 +19,8 @@ internal fun loadConfig(): Config {
             password = str("konvi.database.password", "")
         ),
         cors = CorsConfig(
-            allowedOrigins = list("konvi.cors.allowedOrigins")
+            allowedOrigins = list("konvi.cors.allowedOrigins"),
+            allowedHosts = list("konvi.cors.allowedHosts"),
         ),
         auth = AuthConfig(
             basic = BasicAuthConfig(str("konvi.auth.basic.realm", default = "Konvi")),
