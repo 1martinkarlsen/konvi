@@ -8,7 +8,10 @@ import com.konvi.config.DatabaseConfig
 import com.konvi.config.loadConfig
 import com.konvi.lifecycle.Lifecycle
 import com.konvi.routing.middleware.AuthMiddleware
+import com.konvi.template.PebbleConfiguration
+import com.konvi.template.TemplateService
 import com.zaxxer.hikari.HikariDataSource
+import io.pebbletemplates.pebble.PebbleEngine
 import me.tatarka.inject.annotations.Provides
 
 abstract class KonviComponent {
@@ -30,4 +33,11 @@ abstract class KonviComponent {
     @Provides
     protected fun provideHikariDataSource(dbConfig: DatabaseConfig): HikariDataSource = 
         com.konvi.database.createHikariDataSource(dbConfig)
+
+    @Provides
+    protected fun providesTemplateEngine(): TemplateService = TemplateService(
+        templateEngine = PebbleEngine.Builder()
+            .loader(PebbleConfiguration.pebbleLoader())
+            .build()
+    )
 }
