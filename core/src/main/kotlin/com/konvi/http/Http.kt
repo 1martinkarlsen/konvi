@@ -42,6 +42,9 @@ internal fun Application.configureHttp(
         allowHeader(HttpHeaders.Authorization)
 
         allowOrigins { it in corsConfig.allowedOrigins }
+        corsConfig.allowedHosts.forEach { host ->
+            allowHost(host)
+        }
     }
 
     install(RateLimit) {
