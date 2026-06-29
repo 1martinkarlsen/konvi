@@ -1,7 +1,6 @@
 package com.konvi.routing
 
 import com.konvi.exception.BadRequestException
-import io.ktor.http.Parameters
 import io.ktor.server.routing.RoutingCall
 import java.util.UUID
 import kotlin.reflect.typeOf
