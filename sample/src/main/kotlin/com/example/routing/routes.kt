@@ -20,7 +20,6 @@ fun AppComponent.api() = router {
 
     group("/admin", logMiddleware::test, authMiddleware::basic) {
         get("/dashboard") {
-            println("DASHBOARD")
             view("index")
         }
     }
