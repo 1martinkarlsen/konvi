@@ -7,7 +7,6 @@ import com.konvi.config.AuthConfig
 import com.konvi.config.DatabaseConfig
 import com.konvi.config.loadConfig
 import com.konvi.lifecycle.Lifecycle
-import com.konvi.routing.middleware.AuthMiddleware
 import com.konvi.template.PebbleConfiguration
 import com.konvi.template.TemplateService
 import com.zaxxer.hikari.HikariDataSource
@@ -15,7 +14,6 @@ import io.pebbletemplates.pebble.PebbleEngine
 import me.tatarka.inject.annotations.Provides
 
 abstract class KonviComponent {
-    abstract val authMiddleware: AuthMiddleware
     abstract val basicAuthenticator: BasicAuthenticator
     abstract val jwtAuthenticator: JwtAuthenticator
     abstract val jwtService: JwtService

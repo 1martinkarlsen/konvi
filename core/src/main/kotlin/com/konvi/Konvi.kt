@@ -16,6 +16,7 @@ import io.ktor.server.application.ApplicationStopping
 import io.ktor.server.application.Plugin
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.runBlocking

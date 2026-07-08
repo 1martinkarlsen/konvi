@@ -18,6 +18,7 @@ private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
 private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
+private const val GENERATED_ROUTE_FILE = "RouteComponent"
 
 private val AUTHENTICATION_SCHEMES = listOf(
     AuthScheme(
@@ -75,9 +76,12 @@ class KonviProcessor(
             }
         }
 
-        generateComponent(
+        generateRouteComponent(
             routes = routes,
-            middlewares = middlewares,
+            middlewares = middlewares
+        )
+
+        generateComponent(
             lifecycleHooks = lifecycleHooks,
             implByScheme = implByScheme
         )
@@ -86,13 +90,10 @@ class KonviProcessor(
     }
 
     private fun generateComponent(
-        routes: List<KSClassDeclaration>,
-        middlewares: List<KSClassDeclaration>,
         lifecycleHooks: List<KSClassDeclaration>,
         implByScheme: Map<AuthScheme, KSClassDeclaration>
     ) {
-        val exposedClasses = routes + middlewares
-        val sourceFiles = (exposedClasses + implByScheme.values + lifecycleHooks)
+        val sourceFiles = (implByScheme.values + lifecycleHooks)
             .mapNotNull { it.containingFile }
             .distinct()
             .toTypedArray()
@@ -113,16 +114,12 @@ class KonviProcessor(
                 writer.appendLine("import ${scheme.interfaceFqn}")
                 if (implByScheme[scheme] == null) writer.appendLine("import ${scheme.denyAllFqn}")
             }
-            (exposedClasses + implByScheme.values + lifecycleHooks).forEach {
+            (implByScheme.values + lifecycleHooks).forEach {
                 writer.appendLine("import ${it.qualifiedName!!.asString()}")
             }
             writer.appendLine()
             writer.appendLine("@Component")
-            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent() {")
-            exposedClasses.forEach {
-                val name = it.simpleName.asString()
-                writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
-            }
+            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), $GENERATED_ROUTE_FILE {")
 
             provideLifecycle(
                 writer = writer,
@@ -137,7 +134,40 @@ class KonviProcessor(
             writer.appendLine("}")
 
             writer.appendLine()
-            writer.appendLine("typealias Routing = KonviRoutingBuilder<$GENERATED_FILE>")
+            writer.appendLine("typealias Routing = KonviRoutingBuilder")
+        }
+    }
+
+    private fun generateRouteComponent(
+        routes: List<KSClassDeclaration>,
+        middlewares: List<KSClassDeclaration>
+    ) {
+        val exposedClasses = routes + middlewares
+        val sourceFiles = exposedClasses
+            .mapNotNull { it.containingFile }
+            .distinct()
+            .toTypedArray()
+
+        codeGenerator.createNewFile(
+            dependencies = Dependencies(aggregating = true, sources = sourceFiles),
+            packageName = GENERATED_PACKAGE,
+            fileName = GENERATED_ROUTE_FILE
+        ).bufferedWriter().use { writer ->
+            writer.appendLine("package $GENERATED_PACKAGE")
+            writer.appendLine()
+            writer.appendLine("import com.konvi.di.RouteContext")
+            exposedClasses.forEach {
+                writer.appendLine("import ${it.qualifiedName!!.asString()}")
+            }
+            writer.appendLine()
+            writer.appendLine("interface $GENERATED_ROUTE_FILE : RouteContext {")
+            exposedClasses.forEach {
+                val name = it.simpleName.asString()
+                writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
+            }
+
+            writer.appendLine("}")
+            writer.appendLine()
         }
     }
 
