@@ -1,5 +1,7 @@
 package com.konvi.routing.integration
 
+import com.konvi.di.RouteContext
+import com.konvi.routing.middleware.AuthMiddleware
 import com.konvi.routing.router
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -15,10 +17,14 @@ import kotlin.test.assertTrue
 
 class MiddlewareIntegrationTest {
 
+    private val routeContext = object : RouteContext {
+        override val authMiddleware: AuthMiddleware get() = error("unused in routing tests")
+    }
+
     @Test
     fun `handler runs when there is no middleware`() = testApplication {
         var handlerRan = false
-        val konvi = router {
+        val konvi = routeContext.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") })
         }
         application { routing { konvi.block(this) } }
@@ -33,7 +39,7 @@ class MiddlewareIntegrationTest {
     fun `passive middleware does not block the handler`() = testApplication {
         var handlerRan = false
         val passive: suspend (ApplicationCall) -> Unit = { /* does not respond */ }
-        val konvi = router {
+        val konvi = routeContext.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") }, passive)
         }
         application { routing { konvi.block(this) } }
@@ -48,7 +54,7 @@ class MiddlewareIntegrationTest {
     fun `middleware that responds short-circuits the handler`() = testApplication {
         var handlerRan = false
         val blocker: suspend (ApplicationCall) -> Unit = { it.respond(HttpStatusCode.Forbidden, "BLOCKED") }
-        val konvi = router {
+        val konvi = routeContext.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") }, blocker)
         }
         application { routing { konvi.block(this) } }
@@ -66,7 +72,7 @@ class MiddlewareIntegrationTest {
         var handlerRan = false
         val first: suspend (ApplicationCall) -> Unit = { it.respond(HttpStatusCode.Forbidden, "BLOCKED") }
         val second: suspend (ApplicationCall) -> Unit = { secondRan = true }
-        val konvi = router {
+        val konvi = routeContext.router {
             get("/x", handler = { handlerRan = true; respond(HttpStatusCode.OK, "HANDLER") }, first, second)
         }
         application { routing { konvi.block(this) } }
@@ -85,7 +91,7 @@ class MiddlewareIntegrationTest {
             middlewareRan = true
             it.respond(HttpStatusCode.Forbidden, "BLOCKED")
         }
-        val konvi = router {
+        val konvi = routeContext.router {
             get("/users", handler = { respond(HttpStatusCode.OK, "ALL") }, blocker)
             get("/users/{id}", handler = { respond(HttpStatusCode.OK, "ONE") })
         }
@@ -109,7 +115,7 @@ class MiddlewareIntegrationTest {
             middlewareRan = true
             it.respond(HttpStatusCode.Forbidden, "BLOCKED")
         }
-        val konvi = router {
+        val konvi = routeContext.router {
             group("/admin", blocker) {
                 get("/dashboard", handler = { respond(HttpStatusCode.OK, "DASH") })
             }

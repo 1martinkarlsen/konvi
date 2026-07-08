@@ -247,6 +247,6 @@ private fun Route.create(
     }
 }
 
-fun router(block: KonviRoutingBuilder.() -> Unit) = KonviRouter {
+fun RouteContext.router(block: KonviRoutingBuilder.() -> Unit) = KonviRouter {
     KonviRoutingBuilder(routing = this).apply(block)
 }
