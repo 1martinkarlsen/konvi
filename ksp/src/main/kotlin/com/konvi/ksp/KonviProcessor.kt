@@ -18,7 +18,7 @@ private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
 private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
-private const val GENERATED_ROUTE_FILE = "RouteComponent"
+private const val GENERATED_ROUTE_FILE = "RouteScope"
 
 private val AUTHENTICATION_SCHEMES = listOf(
     AuthScheme(
