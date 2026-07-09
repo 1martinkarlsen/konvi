@@ -12,13 +12,13 @@ class UserController @Inject constructor() {
     }
 }
 
-fun AppComponent.api() = router {
+fun RouteScope.api() = router {
     get("/users", userController::getAll)
     
     get("/users/me", userController::me, authMiddleware::basic)
 }
 
-fun main() = startKonvi(AppComponent::api)
+fun main() = startKonvi(RouteScope::api)
 ```
 
 ## Configuration

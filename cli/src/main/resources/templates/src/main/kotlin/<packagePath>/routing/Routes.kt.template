@@ -1,10 +1,10 @@
 package <basePackage>.routing
 
-import com.konvi.generated.AppComponent
+import com.konvi.generated.RouteScope
 import com.konvi.routing.router
 import com.konvi.template.view
 
-fun AppComponent.routing() = router {
+fun RouteScope.routing() = router {
     get("/") {
         view("index")
     }

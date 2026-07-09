@@ -18,6 +18,7 @@ private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
 private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
+private const val GENERATED_ROUTE_FILE = "RouteScope"
 
 private val AUTHENTICATION_SCHEMES = listOf(
     AuthScheme(
@@ -75,9 +76,12 @@ class KonviProcessor(
             }
         }
 
-        generateComponent(
+        generateRouteComponent(
             routes = routes,
-            middlewares = middlewares,
+            middlewares = middlewares
+        )
+
+        generateComponent(
             lifecycleHooks = lifecycleHooks,
             implByScheme = implByScheme
         )
@@ -86,24 +90,11 @@ class KonviProcessor(
     }
 
     private fun generateComponent(
-        routes: List<KSClassDeclaration>,
-        middlewares: List<KSClassDeclaration>,
         lifecycleHooks: List<KSClassDeclaration>,
         implByScheme: Map<AuthScheme, KSClassDeclaration>
     ) {
-        val exposedClasses = routes + middlewares
-        val sourceFiles = (exposedClasses + implByScheme.values + lifecycleHooks)
-            .mapNotNull { it.containingFile }
-            .distinct()
-            .toTypedArray()
-
-        codeGenerator.createNewFile(
-            dependencies = Dependencies(aggregating = true, sources = sourceFiles),
-            packageName = GENERATED_PACKAGE,
-            fileName = GENERATED_FILE
-        ).bufferedWriter().use { writer ->
-            writer.appendLine("package $GENERATED_PACKAGE")
-            writer.appendLine()
+        val exposedClasses = implByScheme.values + lifecycleHooks
+        generateFile(GENERATED_FILE, exposedClasses) { writer ->
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
             writer.appendLine("import com.konvi.di.KonviComponent")
@@ -113,16 +104,10 @@ class KonviProcessor(
                 writer.appendLine("import ${scheme.interfaceFqn}")
                 if (implByScheme[scheme] == null) writer.appendLine("import ${scheme.denyAllFqn}")
             }
-            (exposedClasses + implByScheme.values + lifecycleHooks).forEach {
-                writer.appendLine("import ${it.qualifiedName!!.asString()}")
-            }
+            writer.writeImports(exposedClasses)
             writer.appendLine()
             writer.appendLine("@Component")
-            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent() {")
-            exposedClasses.forEach {
-                val name = it.simpleName.asString()
-                writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
-            }
+            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), $GENERATED_ROUTE_FILE {")
 
             provideLifecycle(
                 writer = writer,
@@ -135,9 +120,48 @@ class KonviProcessor(
             )
 
             writer.appendLine("}")
+        }
+    }
 
+    private fun generateRouteComponent(
+        routes: List<KSClassDeclaration>,
+        middlewares: List<KSClassDeclaration>
+    ) {
+        val exposedClasses = routes + middlewares
+        generateFile(GENERATED_ROUTE_FILE, exposedClasses) { writer ->
+            writer.appendLine("import com.konvi.di.RouteContext")
+            writer.writeImports(exposedClasses)
             writer.appendLine()
-            writer.appendLine("typealias Routing = KonviRoutingBuilder<$GENERATED_FILE>")
+            writer.appendLine("interface $GENERATED_ROUTE_FILE : RouteContext {")
+            exposedClasses.forEach {
+                val name = it.simpleName.asString()
+                writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
+            }
+
+            writer.appendLine("}")
+        }
+    }
+
+    // Shared scaffold for a generated file: opens the writer with an aggregating dependency on
+    // every source file the exposed classes came from, and writes the package header.
+    private fun generateFile(
+        fileName: String,
+        exposedClasses: Collection<KSClassDeclaration>,
+        content: (BufferedWriter) -> Unit
+    ) {
+        val sourceFiles = exposedClasses
+            .mapNotNull { it.containingFile }
+            .distinct()
+            .toTypedArray()
+
+        codeGenerator.createNewFile(
+            dependencies = Dependencies(aggregating = true, sources = sourceFiles),
+            packageName = GENERATED_PACKAGE,
+            fileName = fileName
+        ).bufferedWriter().use { writer ->
+            writer.appendLine("package $GENERATED_PACKAGE")
+            writer.appendLine()
+            content(writer)
         }
     }
 
@@ -183,20 +207,25 @@ class KonviProcessor(
         }
     }
 
-    private fun Resolver.classesAnnotatedWith(annotation: String): List<KSClassDeclaration> =
-        getSymbolsWithAnnotation(annotation).filterIsInstance<KSClassDeclaration>().toList()
-
-    private fun KSClassDeclaration.implements(interfaceFqn: String): Boolean =
-        getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == interfaceFqn }
-
-    private fun KSClassDeclaration.fqn(): String = qualifiedName?.asString() ?: simpleName.asString()
-
-    // Discovers concrete classes implementing the given interface (directly or transitively).
-    // Abstract classes and interfaces are skipped since kotlin-inject can only construct concrete types.
-    private fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDeclaration> =
-        getAllFiles()
-            .flatMap { it.declarations }
-            .filterIsInstance<KSClassDeclaration>()
-            .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
-            .toList()
 }
+
+private fun BufferedWriter.writeImports(declarations: Collection<KSClassDeclaration>) {
+    declarations.forEach { appendLine("import ${it.qualifiedName!!.asString()}") }
+}
+
+private fun Resolver.classesAnnotatedWith(annotation: String): List<KSClassDeclaration> =
+    getSymbolsWithAnnotation(annotation).filterIsInstance<KSClassDeclaration>().toList()
+
+private fun KSClassDeclaration.implements(interfaceFqn: String): Boolean =
+    getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == interfaceFqn }
+
+private fun KSClassDeclaration.fqn(): String = qualifiedName?.asString() ?: simpleName.asString()
+
+// Discovers concrete classes implementing the given interface (directly or transitively).
+// Abstract classes and interfaces are skipped since kotlin-inject can only construct concrete types.
+private fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDeclaration> =
+    getAllFiles()
+        .flatMap { it.declarations }
+        .filterIsInstance<KSClassDeclaration>()
+        .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
+        .toList()
