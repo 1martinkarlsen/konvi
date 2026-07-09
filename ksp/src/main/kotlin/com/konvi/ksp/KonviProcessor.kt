@@ -132,9 +132,6 @@ class KonviProcessor(
             )
 
             writer.appendLine("}")
-
-            writer.appendLine()
-            writer.appendLine("typealias Routing = KonviRoutingBuilder")
         }
     }
 
