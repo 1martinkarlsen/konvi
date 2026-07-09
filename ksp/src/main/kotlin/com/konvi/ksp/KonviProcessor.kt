@@ -93,18 +93,8 @@ class KonviProcessor(
         lifecycleHooks: List<KSClassDeclaration>,
         implByScheme: Map<AuthScheme, KSClassDeclaration>
     ) {
-        val sourceFiles = (implByScheme.values + lifecycleHooks)
-            .mapNotNull { it.containingFile }
-            .distinct()
-            .toTypedArray()
-
-        codeGenerator.createNewFile(
-            dependencies = Dependencies(aggregating = true, sources = sourceFiles),
-            packageName = GENERATED_PACKAGE,
-            fileName = GENERATED_FILE
-        ).bufferedWriter().use { writer ->
-            writer.appendLine("package $GENERATED_PACKAGE")
-            writer.appendLine()
+        val exposedClasses = implByScheme.values + lifecycleHooks
+        generateFile(GENERATED_FILE, exposedClasses) { writer ->
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
             writer.appendLine("import com.konvi.di.KonviComponent")
@@ -114,9 +104,7 @@ class KonviProcessor(
                 writer.appendLine("import ${scheme.interfaceFqn}")
                 if (implByScheme[scheme] == null) writer.appendLine("import ${scheme.denyAllFqn}")
             }
-            (implByScheme.values + lifecycleHooks).forEach {
-                writer.appendLine("import ${it.qualifiedName!!.asString()}")
-            }
+            writer.writeImports(exposedClasses)
             writer.appendLine()
             writer.appendLine("@Component")
             writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), $GENERATED_ROUTE_FILE {")
@@ -140,22 +128,9 @@ class KonviProcessor(
         middlewares: List<KSClassDeclaration>
     ) {
         val exposedClasses = routes + middlewares
-        val sourceFiles = exposedClasses
-            .mapNotNull { it.containingFile }
-            .distinct()
-            .toTypedArray()
-
-        codeGenerator.createNewFile(
-            dependencies = Dependencies(aggregating = true, sources = sourceFiles),
-            packageName = GENERATED_PACKAGE,
-            fileName = GENERATED_ROUTE_FILE
-        ).bufferedWriter().use { writer ->
-            writer.appendLine("package $GENERATED_PACKAGE")
-            writer.appendLine()
+        generateFile(GENERATED_ROUTE_FILE, exposedClasses) { writer ->
             writer.appendLine("import com.konvi.di.RouteContext")
-            exposedClasses.forEach {
-                writer.appendLine("import ${it.qualifiedName!!.asString()}")
-            }
+            writer.writeImports(exposedClasses)
             writer.appendLine()
             writer.appendLine("interface $GENERATED_ROUTE_FILE : RouteContext {")
             exposedClasses.forEach {
@@ -164,8 +139,34 @@ class KonviProcessor(
             }
 
             writer.appendLine("}")
-            writer.appendLine()
         }
+    }
+
+    // Shared scaffold for a generated file: opens the writer with an aggregating dependency on
+    // every source file the exposed classes came from, and writes the package header.
+    private fun generateFile(
+        fileName: String,
+        exposedClasses: Collection<KSClassDeclaration>,
+        content: (BufferedWriter) -> Unit
+    ) {
+        val sourceFiles = exposedClasses
+            .mapNotNull { it.containingFile }
+            .distinct()
+            .toTypedArray()
+
+        codeGenerator.createNewFile(
+            dependencies = Dependencies(aggregating = true, sources = sourceFiles),
+            packageName = GENERATED_PACKAGE,
+            fileName = fileName
+        ).bufferedWriter().use { writer ->
+            writer.appendLine("package $GENERATED_PACKAGE")
+            writer.appendLine()
+            content(writer)
+        }
+    }
+
+    private fun BufferedWriter.writeImports(declarations: Collection<KSClassDeclaration>) {
+        declarations.forEach { appendLine("import ${it.qualifiedName!!.asString()}") }
     }
 
     // Collects every concrete Lifecycle implementation into the single List<Lifecycle> the
