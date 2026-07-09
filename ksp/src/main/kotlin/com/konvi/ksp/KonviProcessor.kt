@@ -165,10 +165,6 @@ class KonviProcessor(
         }
     }
 
-    private fun BufferedWriter.writeImports(declarations: Collection<KSClassDeclaration>) {
-        declarations.forEach { appendLine("import ${it.qualifiedName!!.asString()}") }
-    }
-
     // Collects every concrete Lifecycle implementation into the single List<Lifecycle> the
     // KonviComponent exposes. Emits emptyList() when there are no hooks so apps without any
     // still satisfy the binding.
@@ -211,20 +207,25 @@ class KonviProcessor(
         }
     }
 
-    private fun Resolver.classesAnnotatedWith(annotation: String): List<KSClassDeclaration> =
-        getSymbolsWithAnnotation(annotation).filterIsInstance<KSClassDeclaration>().toList()
-
-    private fun KSClassDeclaration.implements(interfaceFqn: String): Boolean =
-        getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == interfaceFqn }
-
-    private fun KSClassDeclaration.fqn(): String = qualifiedName?.asString() ?: simpleName.asString()
-
-    // Discovers concrete classes implementing the given interface (directly or transitively).
-    // Abstract classes and interfaces are skipped since kotlin-inject can only construct concrete types.
-    private fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDeclaration> =
-        getAllFiles()
-            .flatMap { it.declarations }
-            .filterIsInstance<KSClassDeclaration>()
-            .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
-            .toList()
 }
+
+private fun BufferedWriter.writeImports(declarations: Collection<KSClassDeclaration>) {
+    declarations.forEach { appendLine("import ${it.qualifiedName!!.asString()}") }
+}
+
+private fun Resolver.classesAnnotatedWith(annotation: String): List<KSClassDeclaration> =
+    getSymbolsWithAnnotation(annotation).filterIsInstance<KSClassDeclaration>().toList()
+
+private fun KSClassDeclaration.implements(interfaceFqn: String): Boolean =
+    getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == interfaceFqn }
+
+private fun KSClassDeclaration.fqn(): String = qualifiedName?.asString() ?: simpleName.asString()
+
+// Discovers concrete classes implementing the given interface (directly or transitively).
+// Abstract classes and interfaces are skipped since kotlin-inject can only construct concrete types.
+private fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDeclaration> =
+    getAllFiles()
+        .flatMap { it.declarations }
+        .filterIsInstance<KSClassDeclaration>()
+        .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
+        .toList()
