@@ -78,7 +78,7 @@ object Konvi {
 fun <T> startKonvi(
     routes: T.() -> KonviRouter,
     plugins: PluginScope.() -> Unit = {}
-) where T : KonviComponent, T : DatabaseContext{
+) where T : KonviComponent, T : DatabaseContext {
     @Suppress("UNCHECKED_CAST")
     val component = loadGeneratedComponent() as T
     Konvi.start(component, routes, plugins)

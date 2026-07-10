@@ -4,12 +4,10 @@ import com.konvi.auth.basic.BasicAuthenticator
 import com.konvi.auth.jwt.JwtAuthenticator
 import com.konvi.auth.jwt.JwtService
 import com.konvi.config.AuthConfig
-import com.konvi.config.DatabaseConfig
 import com.konvi.config.loadConfig
 import com.konvi.lifecycle.Lifecycle
 import com.konvi.template.PebbleConfiguration
 import com.konvi.template.TemplateService
-import com.zaxxer.hikari.HikariDataSource
 import io.pebbletemplates.pebble.PebbleEngine
 import me.tatarka.inject.annotations.Provides
 
