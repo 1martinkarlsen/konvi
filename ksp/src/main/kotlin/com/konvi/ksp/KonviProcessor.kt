@@ -51,7 +51,7 @@ class KonviProcessor(
         val middlewares = resolver.classesAnnotatedWith(MIDDLEWARE_ANNOTATION)
         val authenticators = resolver.classesAnnotatedWith(AUTHENTICATOR_ANNOTATION)
         val lifecycleHooks = resolver.classesWithInterface(LIFECYCLE_INTERFACE)
-        val tables = resolver.classesOrObjectInherit(TABLE_INTERFACE)
+        val tables = resolver.objectsInheriting(TABLE_INTERFACE)
 
         // Resolve each @Authenticator to the scheme it implements (at most one impl per scheme).
         val implByScheme = mutableMapOf<AuthScheme, KSClassDeclaration>()
@@ -161,7 +161,7 @@ class KonviProcessor(
             writer.appendLine("    fun providesDbTables(): List<Table> =")
             writer.appendLine("        listOf(")
             tables.forEach { table ->
-                writer.appendLine("            $table")
+                writer.appendLine("            ${table.simpleName.asString()}")
             }
             writer.appendLine("        )")
 

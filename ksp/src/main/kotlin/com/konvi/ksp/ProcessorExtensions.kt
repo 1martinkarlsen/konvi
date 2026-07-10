@@ -1,7 +1,6 @@
 package com.konvi.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
-import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
@@ -30,17 +29,12 @@ internal fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDe
         .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
         .toList()
 
-internal fun Resolver.classesOrObjectInherit(name: String): List<KSClassDeclaration> {
-    val rootType = getClassDeclarationByName(name)?.asStarProjectedType() ?: return emptyList()
-
-    return getAllFiles()
+// Discovers singleton `object` declarations that inherit the given class (directly or transitively).
+// Only objects are included: the generated code references each match as a bare value expression,
+// which type-checks for a singleton instance but not for a class that still needs constructor args.
+internal fun Resolver.objectsInheriting(classFqn: String): List<KSClassDeclaration> =
+    getAllFiles()
         .flatMap { it.declarations }
         .filterIsInstance<KSClassDeclaration>()
-        .filter { declaration ->
-            declaration
-                .getAllSuperTypes()
-                .any {
-                    it.declaration.qualifiedName == rootType.declaration.qualifiedName
-                }
-        }.toList()
-}
+        .filter { it.classKind == ClassKind.OBJECT && it.implements(classFqn) }
+        .toList()
