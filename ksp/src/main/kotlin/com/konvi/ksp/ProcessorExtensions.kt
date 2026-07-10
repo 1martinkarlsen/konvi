@@ -1,6 +1,7 @@
 package com.konvi.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
@@ -28,3 +29,18 @@ internal fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDe
         .filterIsInstance<KSClassDeclaration>()
         .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
         .toList()
+
+internal fun Resolver.classesOrObjectInherit(name: String): List<KSClassDeclaration> {
+    val rootType = getClassDeclarationByName(name)?.asStarProjectedType() ?: return emptyList()
+
+    return getAllFiles()
+        .flatMap { it.declarations }
+        .filterIsInstance<KSClassDeclaration>()
+        .filter { declaration ->
+            declaration
+                .getAllSuperTypes()
+                .any {
+                    it.declaration.qualifiedName == rootType.declaration.qualifiedName
+                }
+        }.toList()
+}

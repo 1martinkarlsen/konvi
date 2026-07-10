@@ -13,6 +13,7 @@ private const val ROUTE_ANNOTATION = "com.konvi.routing.Route"
 private const val MIDDLEWARE_ANNOTATION = "com.konvi.routing.Middleware"
 private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
 private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
+private const val TABLE_INTERFACE = "org.jetbrains.exposed.sql.Table"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
 private const val GENERATED_ROUTE_FILE = "RouteScope"
@@ -50,7 +51,7 @@ class KonviProcessor(
         val middlewares = resolver.classesAnnotatedWith(MIDDLEWARE_ANNOTATION)
         val authenticators = resolver.classesAnnotatedWith(AUTHENTICATOR_ANNOTATION)
         val lifecycleHooks = resolver.classesWithInterface(LIFECYCLE_INTERFACE)
-
+        val tables = resolver.classesOrObjectInherit(TABLE_INTERFACE)
 
         // Resolve each @Authenticator to the scheme it implements (at most one impl per scheme).
         val implByScheme = mutableMapOf<AuthScheme, KSClassDeclaration>()
@@ -79,7 +80,9 @@ class KonviProcessor(
             middlewares = middlewares
         )
 
-        generateDatabaseScope()
+        generateDatabaseScope(
+            tables = tables
+        )
 
         generateComponent(
             lifecycleHooks = lifecycleHooks,
@@ -136,18 +139,31 @@ class KonviProcessor(
             writer.appendLine("interface $GENERATED_ROUTE_FILE : RouteContext {")
             exposedClasses.forEach {
                 val name = it.simpleName.asString()
-                writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
+                writer.appendLine("    val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
             }
 
             writer.appendLine("}")
         }
     }
 
-    private fun generateDatabaseScope() {
+    private fun generateDatabaseScope(
+        tables: List<KSClassDeclaration>
+    ) {
         generateFile(GENERATED_DATABASE_FILE, emptyList()) { writer ->
             writer.appendLine("import com.konvi.di.DatabaseContext")
+            writer.appendLine("import me.tatarka.inject.annotations.Provides")
+            writer.appendLine("import org.jetbrains.exposed.sql.Table")
+            writer.writeImports(tables)
             writer.appendLine()
             writer.appendLine("interface $GENERATED_DATABASE_FILE : DatabaseContext {")
+            writer.appendLine()
+            writer.appendLine("    @Provides")
+            writer.appendLine("    fun providesDbTables(): List<Table> =")
+            writer.appendLine("        listOf(")
+            tables.forEach { table ->
+                writer.appendLine("            $table")
+            }
+            writer.appendLine("        )")
 
             writer.appendLine("}")
         }
