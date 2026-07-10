@@ -2,6 +2,7 @@ package com.konvi
 
 import com.konvi.config.loadConfig
 import com.konvi.database.configureDatabase
+import com.konvi.di.DatabaseContext
 import com.konvi.di.KonviComponent
 import com.konvi.exception.configureExceptions
 import com.konvi.http.configureHttp
@@ -23,11 +24,11 @@ import kotlinx.coroutines.runBlocking
 private const val GENERATED_COMPONENT = "com.konvi.generated.InjectAppComponent"
 
 object Konvi {
-    fun <T : KonviComponent> start(
+    fun <T> start(
         component: T,
         routes: T.() -> KonviRouter,
         plugins: PluginScope.() -> Unit = {}
-    ) {
+    ) where T : KonviComponent, T : DatabaseContext {
         val config = loadConfig()
 
         embeddedServer(Netty, port = config.port) {
@@ -74,10 +75,10 @@ object Konvi {
     }
 }
 
-fun <T : KonviComponent> startKonvi(
+fun <T> startKonvi(
     routes: T.() -> KonviRouter,
     plugins: PluginScope.() -> Unit = {}
-) {
+) where T : KonviComponent, T : DatabaseContext{
     @Suppress("UNCHECKED_CAST")
     val component = loadGeneratedComponent() as T
     Konvi.start(component, routes, plugins)

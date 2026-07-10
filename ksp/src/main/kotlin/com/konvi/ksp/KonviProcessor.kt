@@ -19,6 +19,7 @@ private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
 private const val GENERATED_ROUTE_FILE = "RouteScope"
+private const val GENERATED_DATABASE_FILE = "DatabaseScope"
 
 private val AUTHENTICATION_SCHEMES = listOf(
     AuthScheme(
@@ -81,6 +82,8 @@ class KonviProcessor(
             middlewares = middlewares
         )
 
+        generateDatabaseScope()
+
         generateComponent(
             lifecycleHooks = lifecycleHooks,
             implByScheme = implByScheme
@@ -107,7 +110,7 @@ class KonviProcessor(
             writer.writeImports(exposedClasses)
             writer.appendLine()
             writer.appendLine("@Component")
-            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), $GENERATED_ROUTE_FILE {")
+            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), $GENERATED_ROUTE_FILE, $GENERATED_DATABASE_FILE {")
 
             provideLifecycle(
                 writer = writer,
@@ -137,6 +140,16 @@ class KonviProcessor(
                 val name = it.simpleName.asString()
                 writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
             }
+
+            writer.appendLine("}")
+        }
+    }
+
+    private fun generateDatabaseScope() {
+        generateFile(GENERATED_DATABASE_FILE, emptyList()) { writer ->
+            writer.appendLine("import com.konvi.di.DatabaseContext")
+            writer.appendLine()
+            writer.appendLine("interface $GENERATED_DATABASE_FILE : DatabaseContext {")
 
             writer.appendLine("}")
         }

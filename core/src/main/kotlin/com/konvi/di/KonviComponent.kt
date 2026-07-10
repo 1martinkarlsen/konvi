@@ -19,18 +19,9 @@ abstract class KonviComponent {
     abstract val jwtService: JwtService
 
     abstract val lifecycle: List<Lifecycle>
-    
-    abstract val hikariDataSource: HikariDataSource
 
     @Provides
     protected fun provideAuthConfig(): AuthConfig = loadConfig().auth
-    
-    @Provides
-    protected fun provideDatabaseConfig(): DatabaseConfig = loadConfig().database
-    
-    @Provides
-    protected fun provideHikariDataSource(dbConfig: DatabaseConfig): HikariDataSource = 
-        com.konvi.database.createHikariDataSource(dbConfig)
 
     @Provides
     protected fun providesTemplateEngine(): TemplateService = TemplateService(
