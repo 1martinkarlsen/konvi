@@ -1,13 +1,10 @@
 package com.konvi.ksp
 
-import com.google.devtools.ksp.getAllSuperTypes
-import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import java.io.BufferedWriter
@@ -19,6 +16,7 @@ private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
 private const val GENERATED_ROUTE_FILE = "RouteScope"
+private const val GENERATED_DATABASE_FILE = "DatabaseScope"
 
 private val AUTHENTICATION_SCHEMES = listOf(
     AuthScheme(
@@ -70,7 +68,7 @@ class KonviProcessor(
             if (existing != null) {
                 logger.error(
                     "Multiple @Authenticator classes implement ${scheme.interfaceName}: " +
-                        "${existing.fqn()} and ${authenticator.fqn()}; only one is supported",
+                            "${existing.fqn()} and ${authenticator.fqn()}; only one is supported",
                     authenticator
                 )
             }
@@ -80,6 +78,8 @@ class KonviProcessor(
             routes = routes,
             middlewares = middlewares
         )
+
+        generateDatabaseScope()
 
         generateComponent(
             lifecycleHooks = lifecycleHooks,
@@ -107,7 +107,8 @@ class KonviProcessor(
             writer.writeImports(exposedClasses)
             writer.appendLine()
             writer.appendLine("@Component")
-            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), $GENERATED_ROUTE_FILE {")
+            writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), ")
+            writer.appendLine("    $GENERATED_ROUTE_FILE, $GENERATED_DATABASE_FILE {")
 
             provideLifecycle(
                 writer = writer,
@@ -137,6 +138,16 @@ class KonviProcessor(
                 val name = it.simpleName.asString()
                 writer.appendLine("    abstract val ${name.replaceFirstChar { c -> c.lowercase() }}: $name")
             }
+
+            writer.appendLine("}")
+        }
+    }
+
+    private fun generateDatabaseScope() {
+        generateFile(GENERATED_DATABASE_FILE, emptyList()) { writer ->
+            writer.appendLine("import com.konvi.di.DatabaseContext")
+            writer.appendLine()
+            writer.appendLine("interface $GENERATED_DATABASE_FILE : DatabaseContext {")
 
             writer.appendLine("}")
         }
@@ -199,33 +210,14 @@ class KonviProcessor(
                             "${scheme.interfaceName} = impl"
                 )
             } else {
-                writer.appendLine("    fun " +
-                        "${scheme.provideFunction}(): " +
-                        "${scheme.interfaceName} = " +
-                        "${scheme.denyAllName}")
+                writer.appendLine(
+                    "    fun " +
+                            "${scheme.provideFunction}(): " +
+                            "${scheme.interfaceName} = " +
+                            "${scheme.denyAllName}"
+                )
             }
         }
     }
 
 }
-
-private fun BufferedWriter.writeImports(declarations: Collection<KSClassDeclaration>) {
-    declarations.forEach { appendLine("import ${it.qualifiedName!!.asString()}") }
-}
-
-private fun Resolver.classesAnnotatedWith(annotation: String): List<KSClassDeclaration> =
-    getSymbolsWithAnnotation(annotation).filterIsInstance<KSClassDeclaration>().toList()
-
-private fun KSClassDeclaration.implements(interfaceFqn: String): Boolean =
-    getAllSuperTypes().any { it.declaration.qualifiedName?.asString() == interfaceFqn }
-
-private fun KSClassDeclaration.fqn(): String = qualifiedName?.asString() ?: simpleName.asString()
-
-// Discovers concrete classes implementing the given interface (directly or transitively).
-// Abstract classes and interfaces are skipped since kotlin-inject can only construct concrete types.
-private fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDeclaration> =
-    getAllFiles()
-        .flatMap { it.declarations }
-        .filterIsInstance<KSClassDeclaration>()
-        .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
-        .toList()
