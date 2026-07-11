@@ -9,6 +9,7 @@ exposed = "0.61.0"
 hikari = "6.3.0"
 h2 = "2.3.232"
 detekt = "1.23.8"
+flywayVer = "12.11.0"
 
 [libraries]
 kotlin-inject = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlinInject" }
@@ -22,6 +23,7 @@ exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exp
 exposed-kotlin-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
+flyway = { module = "org.flywaydb:flyway-core", version.ref = "flywayVer"}
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
