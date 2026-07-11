@@ -43,6 +43,7 @@ dependencies {
     api(libs.exposed.dao)
     api(libs.exposed.kotlin.datetime)
     api(libs.hikaricp)
+    implementation(libs.flyway)
 
     runtimeOnly(libs.h2)
 
