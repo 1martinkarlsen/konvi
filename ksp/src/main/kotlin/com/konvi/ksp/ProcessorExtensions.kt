@@ -28,3 +28,13 @@ internal fun Resolver.classesWithInterface(interfaceFqn: String): List<KSClassDe
         .filterIsInstance<KSClassDeclaration>()
         .filter { it.classKind == ClassKind.CLASS && !it.isAbstract() && it.implements(interfaceFqn) }
         .toList()
+
+// Discovers singleton `object` declarations that inherit the given class (directly or transitively).
+// Only objects are included: the generated code references each match as a bare value expression,
+// which type-checks for a singleton instance but not for a class that still needs constructor args.
+internal fun Resolver.objectsInheriting(classFqn: String): List<KSClassDeclaration> =
+    getAllFiles()
+        .flatMap { it.declarations }
+        .filterIsInstance<KSClassDeclaration>()
+        .filter { it.classKind == ClassKind.OBJECT && it.implements(classFqn) }
+        .toList()
