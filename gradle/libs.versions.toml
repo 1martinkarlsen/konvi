@@ -9,7 +9,7 @@ exposed = "0.61.0"
 hikari = "6.3.0"
 h2 = "2.3.232"
 detekt = "1.23.8"
-flywayVer = "6.5.2"
+flywayVer = "12.11.0"
 
 [libraries]
 kotlin-inject = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlinInject" }
