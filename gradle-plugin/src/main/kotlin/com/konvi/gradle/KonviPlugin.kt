@@ -7,10 +7,10 @@ import org.gradle.api.tasks.SourceSetContainer
 
 private const val KONVI_VERSION = "0.1.0-SNAPSHOT"
 private const val KOTLIN_INJECT_VERSION = "0.9.0"
-private const val MIGRATE_RUN_TASK = "migrate"
+private const val MIGRATE_RUN_TASK = "migrateDatabase"
 private const val MIGRATE_STATUS_TASK = "migrationStatus"
 private const val MIGRATE_REPAIR_TASK = "migrationRepair"
-private const val MIGRATE_BASELINE_TASK = "migrateBaseline"
+private const val MIGRATE_BASELINE_TASK = "migrationBaseline"
 
 class KonviPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -51,6 +51,7 @@ class KonviPlugin : Plugin<Project> {
             description = "Marks the database baseline"
             classpath = runtimeClasspath
             mainClass.set("com.konvi.database.tasks.MigrationBaselineTaskKt")
+            project.findProperty("baselineVersion")?.let { args = listOf(it.toString()) }
         }
     }
 }
