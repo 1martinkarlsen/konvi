@@ -38,9 +38,7 @@ internal object GradleMigrationRunner {
         return try {
             builder.start()
         } catch (e: IOException) {
-            throw CliktError(
-                "Could not run 'gradle $task' — is Gradle installed and on your PATH? (${e.message})"
-            )
+            throw CliktError("Could not run 'gradle $task' — is Gradle installed and on your PATH?", e)
         }
     }
 

@@ -14,9 +14,15 @@ private data class MigrationStatusRow(
     val state: String,
 )
 
+private const val STATUS_COLUMN_COUNT = 4
+private val STATUS_HEADERS = listOf("VERSION", "DESCRIPTION", "INSTALLED ON", "STATE")
+
 internal class StatusMigrationCommand : CliktCommand(name = "status", help = "Show applied and pending migrations") {
 
-    private val all by option("--all", help = "Show full migration history, not just pending/failed").flag(default = false)
+    private val all by option(
+        "--all",
+        help = "Show full migration history, not just pending/failed",
+    ).flag(default = false)
 
     override fun run() {
         val output = GradleMigrationRunner.capture("migrationStatus")
@@ -40,7 +46,7 @@ internal class StatusMigrationCommand : CliktCommand(name = "status", help = "Sh
         output.lineSequence()
             .mapNotNull { line ->
                 val parts = line.split("\t")
-                if (parts.size != 4) return@mapNotNull null
+                if (parts.size != STATUS_COLUMN_COUNT) return@mapNotNull null
                 MigrationStatusRow(version = parts[0], description = parts[1], installedOn = parts[2], state = parts[3])
             }
             .toList()
@@ -56,7 +62,7 @@ internal class StatusMigrationCommand : CliktCommand(name = "status", help = "Sh
     }
 
     private fun printTable(rows: List<MigrationStatusRow>) {
-        val headers = listOf("VERSION", "DESCRIPTION", "INSTALLED ON", "STATE")
+        val headers = STATUS_HEADERS
         val installedOnCells = rows.map { it.installedOn.ifEmpty { "-" } }
 
         val versionWidth = (listOf(headers[0]) + rows.map { it.version }).maxOf { it.length }
@@ -68,7 +74,7 @@ internal class StatusMigrationCommand : CliktCommand(name = "status", help = "Sh
             headers[0].padEnd(versionWidth) + "  " +
                 headers[1].padEnd(descriptionWidth) + "  " +
                 headers[2].padEnd(installedOnWidth) + "  " +
-                headers[3]
+                headers.last()
         )
 
         rows.forEachIndexed { index, row ->
