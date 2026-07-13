@@ -7,7 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
-class NewCommand constructor(
+internal class NewCommand constructor(
     private val renderer: TemplateRenderer = TemplateRenderer()
 ) : CliktCommand(name = "new", help = "Scaffold a new Konvi project") {
 
