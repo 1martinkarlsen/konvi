@@ -5,9 +5,11 @@ import com.konvi.config.loadConfig
 import com.konvi.database.createHikariDataSource
 import com.zaxxer.hikari.HikariDataSource
 import me.tatarka.inject.annotations.Provides
+import org.jetbrains.exposed.v1.core.Table
 
 interface DatabaseContext {
     val hikariDataSource: HikariDataSource
+    val tables: List<Table>
 
     @Provides
     fun provideDatabaseConfig(): DatabaseConfig = loadConfig().database

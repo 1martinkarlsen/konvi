@@ -42,6 +42,8 @@ dependencies {
     api(libs.exposed.jdbc)
     api(libs.exposed.dao)
     api(libs.exposed.kotlin.datetime)
+    implementation(libs.exposed.migration.core)
+    implementation(libs.exposed.migration.jdbc)
     api(libs.hikaricp)
     implementation(libs.flyway)
 
