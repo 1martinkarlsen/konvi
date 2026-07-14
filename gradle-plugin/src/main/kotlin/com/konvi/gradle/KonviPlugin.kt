@@ -11,6 +11,7 @@ private const val MIGRATE_RUN_TASK = "migrateDatabase"
 private const val MIGRATE_STATUS_TASK = "migrationStatus"
 private const val MIGRATE_REPAIR_TASK = "migrationRepair"
 private const val MIGRATE_BASELINE_TASK = "migrationBaseline"
+private const val GENERATE_MIGRATION_TASK = "generateMigration"
 
 class KonviPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -52,6 +53,13 @@ class KonviPlugin : Plugin<Project> {
             classpath = runtimeClasspath
             mainClass.set("com.konvi.database.tasks.MigrationBaselineTaskKt")
             project.findProperty("baselineVersion")?.let { args = listOf(it.toString()) }
+        }
+
+        project.tasks.register(GENERATE_MIGRATION_TASK, JavaExec::class.java) {
+            group = "konvi"
+            description = "Generates migration SQL by diffing discovered tables against the database"
+            classpath = runtimeClasspath
+            mainClass.set("com.konvi.database.tasks.GenerateMigrationTaskKt")
         }
     }
 }

@@ -13,7 +13,7 @@ private const val ROUTE_ANNOTATION = "com.konvi.routing.Route"
 private const val MIDDLEWARE_ANNOTATION = "com.konvi.routing.Middleware"
 private const val AUTHENTICATOR_ANNOTATION = "com.konvi.auth.Authenticator"
 private const val LIFECYCLE_INTERFACE = "com.konvi.lifecycle.Lifecycle"
-private const val TABLE_INTERFACE = "org.jetbrains.exposed.sql.Table"
+private const val TABLE_INTERFACE = "org.jetbrains.exposed.v1.core.Table"
 private const val GENERATED_PACKAGE = "com.konvi.generated"
 private const val GENERATED_FILE = "AppComponent"
 private const val GENERATED_ROUTE_FILE = "RouteScope"
@@ -152,7 +152,7 @@ class KonviProcessor(
         generateFile(GENERATED_DATABASE_FILE, emptyList()) { writer ->
             writer.appendLine("import com.konvi.di.DatabaseContext")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
-            writer.appendLine("import org.jetbrains.exposed.sql.Table")
+            writer.appendLine("import $TABLE_INTERFACE")
             writer.writeImports(tables)
             writer.appendLine()
             writer.appendLine("interface $GENERATED_DATABASE_FILE : DatabaseContext {")
