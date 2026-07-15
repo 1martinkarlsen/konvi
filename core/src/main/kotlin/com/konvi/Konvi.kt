@@ -51,9 +51,13 @@ object Konvi {
             }
             pluginScope.plugins()
 
+            val lifecycleHooks = listOf(
+                component.databaseLifecycle
+            ) + component.lifecycle
+
             monitor.subscribe(ApplicationStarted) {
                 runBlocking {
-                    component.lifecycle.forEach { hook ->
+                    lifecycleHooks.forEach { hook ->
                         hook.onStart()
                     }
                 }
@@ -61,7 +65,7 @@ object Konvi {
 
             monitor.subscribe(ApplicationStopping) {
                 runBlocking {
-                    component.lifecycle.reversed().forEach { hook ->
+                    lifecycleHooks.reversed().forEach { hook ->
                         hook.onStop()
                     }
                 }
