@@ -18,15 +18,7 @@ class DatabaseLifecycle(
 ) : Lifecycle {
     @Suppress("SpreadOperator")
     override suspend fun onStart() {
-        val statements = transaction {
-            SchemaUtils.statementsRequiredToActualizeScheme(*tables.toTypedArray())
-        }
-        if (statements.isNotEmpty()) {
-            error(
-                "Database schema does not match the declared tables. " +
-                    "Run pending migrations:\n${statements.joinToString("\n")}"
-            )
-        }
+        validateDatabaseScheme(tables)
     }
 
     override suspend fun onStop() {

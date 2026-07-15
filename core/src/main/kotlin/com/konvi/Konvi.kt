@@ -6,6 +6,7 @@ import com.konvi.di.DatabaseContext
 import com.konvi.di.KonviComponent
 import com.konvi.exception.configureExceptions
 import com.konvi.http.configureHttp
+import com.konvi.lifecycle.configureLifecycle
 import com.konvi.logging.configureLogging
 import com.konvi.plugins.PluginScope
 import com.konvi.routing.KonviRouter
@@ -51,25 +52,7 @@ object Konvi {
             }
             pluginScope.plugins()
 
-            val lifecycleHooks = listOf(
-                component.databaseLifecycle
-            ) + component.lifecycle
-
-            monitor.subscribe(ApplicationStarted) {
-                runBlocking {
-                    lifecycleHooks.forEach { hook ->
-                        hook.onStart()
-                    }
-                }
-            }
-
-            monitor.subscribe(ApplicationStopping) {
-                runBlocking {
-                    lifecycleHooks.reversed().forEach { hook ->
-                        hook.onStop()
-                    }
-                }
-            }
+            configureLifecycle(component)
 
             routing {
                 component.configureFrameworkRoutes().block(this)
