@@ -4,8 +4,6 @@ import com.konvi.lifecycle.Lifecycle
 import com.zaxxer.hikari.HikariDataSource
 import me.tatarka.inject.annotations.Inject
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 /**
  * Lifecycle hook that validates the declared tables against the live database schema on startup,

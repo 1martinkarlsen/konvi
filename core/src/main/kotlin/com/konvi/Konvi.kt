@@ -13,14 +13,11 @@ import com.konvi.routing.KonviRouter
 import com.konvi.routing.configureFrameworkRoutes
 import com.konvi.template.configureTemplate
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationStarted
-import io.ktor.server.application.ApplicationStopping
 import io.ktor.server.application.Plugin
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.runBlocking
 
 private const val GENERATED_COMPONENT = "com.konvi.generated.InjectAppComponent"
 
