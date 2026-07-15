@@ -7,7 +7,7 @@ import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.application.ApplicationStopping
 import kotlinx.coroutines.runBlocking
 
-internal fun <T> Application.configureLifecycle(component: T) where T : KonviComponent, T : DatabaseContext{
+internal fun <T> Application.configureLifecycle(component: T) where T : KonviComponent, T : DatabaseContext {
     val lifecycleHooks = listOf(
         component.databaseLifecycle
     ) + component.lifecycle

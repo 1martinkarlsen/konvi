@@ -14,7 +14,6 @@ class DatabaseLifecycle(
     private val hikariDataSource: HikariDataSource,
     private val tables: List<Table>
 ) : Lifecycle {
-    @Suppress("SpreadOperator")
     override suspend fun onStart() {
         validateDatabaseScheme(tables)
     }
