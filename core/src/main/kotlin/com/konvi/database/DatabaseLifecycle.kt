@@ -3,18 +3,19 @@ package com.konvi.database
 import com.konvi.lifecycle.Lifecycle
 import com.zaxxer.hikari.HikariDataSource
 import me.tatarka.inject.annotations.Inject
+import org.jetbrains.exposed.v1.core.Table
 
 /**
- * Lifecycle hook that closes the database connection when the application stops.
- * This ensures proper cleanup of the HikariCP connection pool.
+ * Framework-provided [Lifecycle] hook that manages the database connection across the
+ * application's start and stop events.
  */
 @Inject
 class DatabaseLifecycle(
-    private val hikariDataSource: HikariDataSource
+    private val hikariDataSource: HikariDataSource,
+    private val tables: List<Table>
 ) : Lifecycle {
     override suspend fun onStart() {
-        // Database connection is established during application startup
-        // No action needed here as configureDatabase() is called during app init
+        validateDatabaseScheme(tables)
     }
 
     override suspend fun onStop() {

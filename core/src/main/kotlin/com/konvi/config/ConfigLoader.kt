@@ -3,7 +3,7 @@ package com.konvi.config
 import io.ktor.server.config.yaml.YamlConfigLoader
 
 internal fun loadConfig(): Config {
-    val yaml = YamlConfigLoader().load("application")
+    val yaml = YamlConfigLoader().load("application.yaml")
 
     fun str(path: String, default: String) = yaml?.propertyOrNull(path)?.getString() ?: default
     fun int(path: String, default: Int) = yaml?.propertyOrNull(path)?.getString()?.toIntOrNull() ?: default

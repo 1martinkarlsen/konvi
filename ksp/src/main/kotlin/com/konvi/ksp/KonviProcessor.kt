@@ -100,6 +100,7 @@ class KonviProcessor(
         generateFile(GENERATED_FILE, exposedClasses) { writer ->
             writer.appendLine("import me.tatarka.inject.annotations.Component")
             writer.appendLine("import me.tatarka.inject.annotations.Provides")
+            writer.appendLine("import com.konvi.di.AppScope")
             writer.appendLine("import com.konvi.di.KonviComponent")
             writer.appendLine("import com.konvi.routing.KonviRoutingBuilder")
             writer.appendLine("import $LIFECYCLE_INTERFACE")
@@ -109,6 +110,7 @@ class KonviProcessor(
             }
             writer.writeImports(exposedClasses)
             writer.appendLine()
+            writer.appendLine("@AppScope")
             writer.appendLine("@Component")
             writer.appendLine("abstract class $GENERATED_FILE : KonviComponent(), ")
             writer.appendLine("    $GENERATED_ROUTE_FILE, $GENERATED_DATABASE_FILE {")

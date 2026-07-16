@@ -6,20 +6,18 @@ import com.konvi.di.DatabaseContext
 import com.konvi.di.KonviComponent
 import com.konvi.exception.configureExceptions
 import com.konvi.http.configureHttp
+import com.konvi.lifecycle.configureLifecycle
 import com.konvi.logging.configureLogging
 import com.konvi.plugins.PluginScope
 import com.konvi.routing.KonviRouter
 import com.konvi.routing.configureFrameworkRoutes
 import com.konvi.template.configureTemplate
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationStarted
-import io.ktor.server.application.ApplicationStopping
 import io.ktor.server.application.Plugin
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.runBlocking
 
 private const val GENERATED_COMPONENT = "com.konvi.generated.InjectAppComponent"
 
@@ -51,21 +49,7 @@ object Konvi {
             }
             pluginScope.plugins()
 
-            monitor.subscribe(ApplicationStarted) {
-                runBlocking {
-                    component.lifecycle.forEach { hook ->
-                        hook.onStart()
-                    }
-                }
-            }
-
-            monitor.subscribe(ApplicationStopping) {
-                runBlocking {
-                    component.lifecycle.reversed().forEach { hook ->
-                        hook.onStop()
-                    }
-                }
-            }
+            configureLifecycle(component)
 
             routing {
                 component.configureFrameworkRoutes().block(this)
