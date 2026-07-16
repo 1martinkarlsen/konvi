@@ -6,8 +6,8 @@ import me.tatarka.inject.annotations.Inject
 import org.jetbrains.exposed.v1.core.Table
 
 /**
- * Lifecycle hook that validates the declared tables against the live database schema on startup,
- * and closes the database connection when the application stops.
+ * Framework-provided [Lifecycle] hook that manages the database connection across the
+ * application's start and stop events.
  */
 @Inject
 class DatabaseLifecycle(

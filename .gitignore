@@ -16,3 +16,6 @@ out/
 # Environment
 .env
 *.env.local
+
+# Local dev database (sample)
+sample/data/
