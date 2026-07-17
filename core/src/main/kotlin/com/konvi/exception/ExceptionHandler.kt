@@ -1,11 +1,16 @@
 package com.konvi.exception
 
 import com.konvi.http.ErrorResponse
+import com.konvi.logging.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
 import io.ktor.server.response.respond
+
+private val log = logger<Application>()
 
 internal fun Application.configureExceptions() {
     install(StatusPages) {
@@ -18,7 +23,8 @@ internal fun Application.configureExceptions() {
                 )
             )
         }
-        exception<Throwable> { call, _ ->
+        exception<Throwable> { call, cause ->
+            log.error("Unhandled exception processing ${call.request.httpMethod.value} ${call.request.path()}", cause)
             call.respond(
                 status = HttpStatusCode.InternalServerError,
                 message = ErrorResponse(
