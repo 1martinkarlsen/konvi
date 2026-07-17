@@ -19,9 +19,7 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
-import io.ktor.server.plugins.ratelimit.RateLimit
 import io.ktor.server.response.header
-import kotlin.time.Duration.Companion.seconds
 
 internal fun Application.configureHttp(
     corsConfig: CorsConfig,
@@ -44,15 +42,6 @@ internal fun Application.configureHttp(
         allowOrigins { it in corsConfig.allowedOrigins }
         corsConfig.allowedHosts.forEach { host ->
             allowHost(host)
-        }
-    }
-
-    install(RateLimit) {
-        global {
-            rateLimiter(
-                limit = 100,
-                refillPeriod = 60.seconds
-            )
         }
     }
 
