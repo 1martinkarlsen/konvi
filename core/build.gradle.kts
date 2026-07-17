@@ -27,7 +27,6 @@ dependencies {
     implementation(ktorLibs.server.cors)
     implementation(ktorLibs.server.statusPages)
     implementation(ktorLibs.server.callLogging)
-    implementation(ktorLibs.server.rateLimit)
     api(ktorLibs.server.contentNegotiation)
     api(ktorLibs.serialization.kotlinx.json)
 
