@@ -15,10 +15,26 @@ class ConfigLoaderTest {
     }
 
     @Test
-    fun `loadConfig falls back to Kotlin defaults when nothing is set`() {
+    fun `loadConfig uses Kotlin defaults for keys absent from application yaml`() {
         val config = loadConfig()
         assertEquals(8080, config.port)
         assertEquals("change-me", config.auth.jwt.secret)
+    }
+
+    @Test
+    fun `loadConfig reads a scalar value from application yaml`() {
+        val config = loadConfig()
+        assertEquals("yaml-issuer", config.auth.jwt.issuer)
+    }
+
+    @Test
+    fun `loadConfig reads a list value from application yaml`() {
+        // Guards the list() path: a YAML list must resolve via getList(), not getString()
+        val config = loadConfig()
+        assertEquals(
+            listOf("https://one.example.com", "https://two.example.com"),
+            config.cors.allowedOrigins
+        )
     }
 
     @Test
@@ -33,7 +49,7 @@ class ConfigLoaderTest {
     }
 
     @Test
-    fun `loadConfig splits system property overrides for list settings`() {
+    fun `loadConfig prefers a system property override over an application yaml list`() {
         System.setProperty("konvi.cors.allowedOrigins", "https://a.example.com, https://b.example.com")
 
         val config = loadConfig()

@@ -10,7 +10,7 @@ konvi:
       - "http://localhost:3000"
   auth:
     jwt:
-      secret: ${JWT_SECRET:dev-secret-change-me}
+      secret: ${JWT_SECRET:change-me}
       issuer: konvi-sample
       audience: konvi-sample
       realm: Konvi

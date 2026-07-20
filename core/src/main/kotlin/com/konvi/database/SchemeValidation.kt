@@ -3,13 +3,14 @@ package com.konvi.database
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
 
 @Suppress("SpreadOperator")
 internal fun validateDatabaseScheme(
     tables: List<Table>
 ) {
     val statements = transaction {
-        SchemaUtils.statementsRequiredToActualizeScheme(*tables.toTypedArray())
+        MigrationUtils.statementsRequiredForDatabaseMigration(*tables.toTypedArray())
     }
     if (statements.isNotEmpty()) {
         error(
