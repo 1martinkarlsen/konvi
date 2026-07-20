@@ -2,13 +2,23 @@ package com.konvi.config
 
 import io.ktor.server.config.yaml.YamlConfigLoader
 
+private fun envName(path: String) = path.uppercase().replace(".", "_")
+
+private fun envOverride(path: String): String? =
+    System.getProperty(path) ?: System.getenv(envName(path))
+
+private fun resolve(yaml: io.ktor.server.config.ApplicationConfig?, path: String): String? =
+    envOverride(path) ?: yaml?.propertyOrNull(path)?.getString()
+
 internal fun loadConfig(): Config {
     val yaml = YamlConfigLoader().load("application.yaml")
 
-    fun str(path: String, default: String) = yaml?.propertyOrNull(path)?.getString() ?: default
-    fun int(path: String, default: Int) = yaml?.propertyOrNull(path)?.getString()?.toIntOrNull() ?: default
-    fun long(path: String, default: Long) = yaml?.propertyOrNull(path)?.getString()?.toLongOrNull() ?: default
-    fun list(path: String) = yaml?.propertyOrNull(path)?.getList() ?: emptyList()
+    fun str(path: String, default: String) = resolve(yaml, path) ?: default
+    fun int(path: String, default: Int) = resolve(yaml, path)?.toIntOrNull() ?: default
+    fun long(path: String, default: Long) = resolve(yaml, path)?.toLongOrNull() ?: default
+    fun list(path: String) =
+        envOverride(path)?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+            ?: yaml?.propertyOrNull(path)?.getList() ?: emptyList()
 
     return Config(
         port = int(path = "konvi.port", default = 8080),
