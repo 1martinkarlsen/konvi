@@ -1,0 +1,8 @@
+konvi:
+  cors:
+    allowedOrigins:
+      - "https://one.example.com"
+      - "https://two.example.com"
+  auth:
+    jwt:
+      issuer: yaml-issuer
