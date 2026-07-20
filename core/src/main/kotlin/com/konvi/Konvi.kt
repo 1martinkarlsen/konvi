@@ -1,6 +1,8 @@
 package com.konvi
 
+import com.konvi.config.Environment
 import com.konvi.config.loadConfig
+import com.konvi.config.validateConfig
 import com.konvi.database.configureDatabase
 import com.konvi.di.DatabaseContext
 import com.konvi.di.KonviComponent
@@ -28,6 +30,8 @@ object Konvi {
         plugins: PluginScope.() -> Unit = {}
     ) where T : KonviComponent, T : DatabaseContext {
         val config = loadConfig()
+        val environment = Environment.resolve()
+        validateConfig(config, environment)
 
         embeddedServer(Netty, port = config.port) {
             configureDatabase(component.hikariDataSource)

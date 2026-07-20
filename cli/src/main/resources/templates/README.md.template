@@ -28,3 +28,28 @@ starts the server via `startKonvi`. You can also run it directly from your IDE.
 ## Configuration
 
 App settings live in `src/main/resources/application.yaml` (e.g. the HTTP `port`).
+Any setting can be overridden without editing the file, via an environment
+variable derived from its config path (uppercased, `.` becomes `_`):
+
+| Setting                        | Environment variable         |
+|---------------------------------|-------------------------------|
+| `konvi.port`                    | `KONVI_PORT`                  |
+| `konvi.database.url`            | `KONVI_DATABASE_URL`          |
+| `konvi.database.driver`         | `KONVI_DATABASE_DRIVER`       |
+| `konvi.database.username`       | `KONVI_DATABASE_USERNAME`     |
+| `konvi.database.password`       | `KONVI_DATABASE_PASSWORD`     |
+| `konvi.auth.jwt.secret`         | `KONVI_AUTH_JWT_SECRET`       |
+| `konvi.auth.jwt.issuer`         | `KONVI_AUTH_JWT_ISSUER`       |
+| `konvi.auth.jwt.audience`       | `KONVI_AUTH_JWT_AUDIENCE`     |
+
+Secrets (like the JWT secret and database credentials) should be set via
+environment variables in every environment beyond local dev — never commit
+them to `application.yaml`.
+
+### Environment
+
+Konvi distinguishes DEVELOPMENT from PRODUCTION via the `KONVI_ENV` environment
+variable (`dev`/`development` or `prod`/`production`; defaults to `development`
+when unset). In PRODUCTION, Konvi refuses to start if the JWT secret is still
+the `change-me` default or the database URL is an in-memory H2 URL — set
+`KONVI_ENV=production` once you've configured real values for both.
